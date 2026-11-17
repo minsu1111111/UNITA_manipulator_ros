@@ -11,7 +11,7 @@
 |---|---|---|---|---|
 | `robot/joint_states` | `sensor_msgs/JointState` | `lerobot_bridge robot` (나중에 sim 도) | 누구나 | fps (기본 60) |
 | `robot/command` | `sensor_msgs/JointState` | `lerobot_bridge teleop` (나중엔 safety 만) | `lerobot_bridge robot` | 리더 주기 |
-| `robot/cam/<name>/image/compressed` | `sensor_msgs/CompressedImage` (jpeg) | `lerobot_bridge robot` | 누구나 | 15 (`camera_fps`) |
+| `robot/cam/<name>/image/compressed` | `sensor_msgs/CompressedImage` (jpeg) | `lerobot_bridge robot` | 누구나 | 30 (`camera_fps`) |
 | `leader/joint_states` | `sensor_msgs/JointState` | `lerobot_bridge leader` | `teleop` | fps (기본 60) |
 | `template/max_joint_speed` | `std_msgs/Float64` | `lerobot_template joint_speed` | — | 관절 상태 주기 |
 

@@ -1,3 +1,6 @@
+# 원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 rosbag_to_lerobot/rosbag_to_lerobot/buffers.py
+# 변경: 없음 (그대로). 원본과 같게 두려고 ruff 검사에서 뺀다 (ruff.toml)
+
 # Copyright 2026 Dmitri Manajev
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

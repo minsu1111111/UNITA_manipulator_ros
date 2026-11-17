@@ -1,3 +1,7 @@
+// 원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 episode_recorder/src/teleop_episode_keyboard.cpp
+// 변경:
+//   - 없음 (그대로)
+
 #include <chrono>
 #include <cstdio>
 #include <cstring>

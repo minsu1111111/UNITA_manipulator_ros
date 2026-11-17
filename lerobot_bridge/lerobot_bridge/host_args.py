@@ -51,8 +51,15 @@ def robot_plan(
     bind: str,
     state_port: int,
     cmd_port: int,
+    camera_fps: int = 30,
+    jpeg_quality: int = 90,
 ) -> HostPlan:
-    tail = [*_common(fps, bind, state_port), f"--cmd_port={cmd_port}"]
+    tail = [
+        *_common(fps, bind, state_port),
+        f"--cmd_port={cmd_port}",
+        f"--camera_fps={camera_fps}",
+        f"--jpeg_quality={jpeg_quality}",
+    ]
     if mock:
         bi = "true" if arm == "bi" else "false"
         cams = ["left_wrist", "right_wrist"] if arm == "bi" else ["wrist"]  # mock 팔로워의 가짜 카메라
