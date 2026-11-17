@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+  단팔 SO-101. 관절 이름 = 단팔 토픽 계약 (shoulder_pan … gripper, 접두사 없음), 관절값 = robot/joint_states 의 rad.
+
+  인자 (xacro 파일 이름:=값):
+    variant   follower | leader   (기본 follower)
+    cameras   true | false        (기본 true. top / wrist 카메라 프레임)
+-->
+<robot name="so101" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="variant" default="follower"/>
+  <xacro:arg name="cameras" default="true"/>
+  <xacro:property name="variant" value="$(arg variant)"/>
+
+  <xacro:include filename="$(find lerobot_description)/urdf/so101_macros.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/so101_materials.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/so101_arm_common.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/end_effectors/so101_ee_common.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/end_effectors/so101_ee_follower.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/end_effectors/so101_ee_leader.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/so101_cameras.xacro"/>
+
+  <xacro:so101_materials/>
+  <xacro:so101_arm_common/>
+  <xacro:if value="${variant == 'follower'}">
+    <xacro:so101_ee_follower/>
+  </xacro:if>
+  <xacro:if value="${variant == 'leader'}">
+    <xacro:so101_ee_leader/>
+  </xacro:if>
+
+  <xacro:if value="$(arg cameras)">
+    <xacro:so101_camera name="top" parent="base_link" xyz="0.25 0 0.80" rpy="0 ${pi/2} 0"/>
+    <xacro:so101_camera name="wrist" parent="gripper_link" xyz="0 0.04 -0.02" rpy="0 ${pi/2} 0"/>
+  </xacro:if>
+
+</robot>

@@ -1,9 +1,13 @@
 <?xml version="1.0"?>
+<!--
+  원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 so101_description/urdf/end_effectors/so101_ee_common.xacro
+  변경: 링크·관절·전동 이름에 ${prefix} 매개변수 추가 (양팔용 left_/right_), 메시 패키지 이름 lerobot_description
+-->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Shared: gripper_frame dummy link -->
-  <xacro:macro name="so101_gripper_frame">
-    <link name="gripper_frame_link">
+  <xacro:macro name="so101_gripper_frame" params="prefix:=''">
+    <link name="${prefix}gripper_frame_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <mass value="1e-9"/>
@@ -11,28 +15,28 @@
       </inertial>
     </link>
 
-    <joint name="gripper_frame_joint" type="fixed">
+    <joint name="${prefix}gripper_frame_joint" type="fixed">
       <origin xyz="-0.0079 -0.000218121 -0.0981274" rpy="0 3.14159 0"/>
-      <parent link="gripper_link"/>
-      <child link="gripper_frame_link"/>
+      <parent link="${prefix}gripper_link"/>
+      <child link="${prefix}gripper_frame_link"/>
     </joint>
   </xacro:macro>
 
   <!-- Shared: wrist_roll joint (+ optional transmission) -->
   <xacro:macro name="so101_wrist_roll_joint"
-               params="add_transmission:='false'">
-    <joint name="wrist_roll" type="revolute">
+               params="prefix:='' add_transmission:='false'">
+    <joint name="${prefix}wrist_roll" type="revolute">
       <origin xyz="5.55112e-17 -0.0611 0.0181" rpy="1.5708 0.0486795 3.14159"/>
-      <parent link="wrist_link"/>
-      <child link="gripper_link"/>
+      <parent link="${prefix}wrist_link"/>
+      <child link="${prefix}gripper_link"/>
       <axis xyz="0 0 1"/>
       <limit effort="10" velocity="10" lower="-2.74385" upper="2.84121"/>
     </joint>
 
     <xacro:if value="${add_transmission}">
       <xacro:simple_transmission
-        name="wrist_roll_trans"
-        joint="wrist_roll"
+        name="${prefix}wrist_roll_trans"
+        joint="${prefix}wrist_roll"
         actuator="motor5"/>
     </xacro:if>
   </xacro:macro>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>lerobot_description</name>
+  <version>0.1.0</version>
+  <description>SO-101 단팔·양팔 URDF(xacro), 메시, 카메라 프레임, RViz 설정. 관절 이름·단위가 토픽 계약과 같다</description>
+  <maintainer email="kms62197724@gmail.com">UNITA Manipulation</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>urdf</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>lerobot_common</test_depend>
+  <test_depend>urdfdom_py</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

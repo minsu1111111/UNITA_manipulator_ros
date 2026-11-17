@@ -1,10 +1,14 @@
 <?xml version="1.0"?>
+<!--
+  원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 so101_description/urdf/end_effectors/so101_ee_follower.xacro
+  변경: 링크·관절·전동 이름에 ${prefix} 매개변수 추가 (양팔용 left_/right_), 메시 패키지 이름 lerobot_description, 원본에서 정의되지 않은 ${actuator_prefix} 를 쓰던 gripper 전동 이름을 motor6 으로
+-->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="so101_ee_follower"
-               params="mesh_dir:='package://so101_description/meshes' add_transmissions:='false'">
+               params="prefix:='' mesh_dir:='package://lerobot_description/meshes' add_transmissions:='false'">
 
-    <link name="gripper_link">
+    <link name="${prefix}gripper_link">
       <xacro:inertial_block
         xyz="0.000213627 0.000245138 -0.025187" rpy="0 0 0"
         mass="0.087"
@@ -18,9 +22,9 @@
         xyz="8.32667e-17 -0.000218214 0.000949706" rpy="-3.14159 -5.55112e-17 0" material="3d_printed"/>
     </link>
 
-    <xacro:so101_gripper_frame />
+    <xacro:so101_gripper_frame prefix="${prefix}"/>
 
-    <link name="moving_jaw_so101_v1_link">
+    <link name="${prefix}moving_jaw_so101_v1_link">
       <xacro:inertial_block
         xyz="-0.00157495 -0.0300244 0.0192755" rpy="0 0 0"
         mass="0.012"
@@ -31,10 +35,10 @@
         xyz="-5.55112e-17 -5.55112e-17 0.0189" rpy="9.53145e-17 6.93889e-18 1.24077e-24" material="3d_printed"/>
     </link>
 
-    <joint name="gripper" type="revolute">
+    <joint name="${prefix}gripper" type="revolute">
       <origin xyz="0.0202 0.0188 -0.0234" rpy="1.5708 -5.24284e-08 -1.41553e-15"/>
-      <parent link="gripper_link"/>
-      <child link="moving_jaw_so101_v1_link"/>
+      <parent link="${prefix}gripper_link"/>
+      <child link="${prefix}moving_jaw_so101_v1_link"/>
       <axis xyz="0 0 1"/>
       <limit effort="10" velocity="10" lower="-0.174533" upper="1.74533"/>
     </joint>
@@ -42,12 +46,12 @@
     <!-- follower-only motor6 transmission (optional) -->
     <xacro:if value="${add_transmissions}">
       <xacro:simple_transmission
-        name="gripper_trans"
-        joint="gripper"
-        actuator="${actuator_prefix}motor6"/>
+        name="${prefix}gripper_trans"
+        joint="${prefix}gripper"
+        actuator="motor6"/>
     </xacro:if>
 
-    <xacro:so101_wrist_roll_joint
+    <xacro:so101_wrist_roll_joint prefix="${prefix}"
       add_transmission="${add_transmissions}"/>
 
   </xacro:macro>

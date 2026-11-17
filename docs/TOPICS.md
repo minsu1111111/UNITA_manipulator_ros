@@ -16,6 +16,13 @@
 | `template/max_joint_speed` | `std_msgs/Float64` | `lerobot_template joint_speed` | — | 관절 상태 주기 |
 
 카메라 `<name>`: 양팔 `top`, `left_wrist`, `right_wrist` / 단팔 `wrist`. 해상도 top 640×480, 손목 320×240 (학습 데이터와 같음).
+이미지의 `header.frame_id` 는 `<name>_camera_optical_frame` — `lerobot_description` URDF 의 카메라 프레임과 같은 이름이다.
+
+## TF
+
+`lerobot_description` 의 URDF 를 `robot_state_publisher` 로 띄우면 `robot/joint_states` 로 TF 가 나온다 (실행법은 `lerobot_description/README.md`).
+링크 이름: 양팔 `world` → `left_base_link`, `right_base_link` → … → `left_gripper_link`, `left_moving_jaw_so101_v1_link`, `left_gripper_frame_link` (오른팔도 같은 꼴),
+단팔은 접두사 없이 `base_link` 부터. 카메라는 `<name>_camera_link`, `<name>_camera_optical_frame`.
 
 ## 관절 이름과 단위
 

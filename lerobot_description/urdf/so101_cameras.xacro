@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+  원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 so101_description/urdf/so101_cameras.xacro
+  변경: static/wrist 두 매크로를 이름을 받는 매크로 하나로 합침 (top, left_wrist, right_wrist, wrist).
+        손목 카메라는 움직이는 집게가 아니라 손목(gripper_link)에 붙인다.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    카메라 프레임 하나: <name>_camera_link (x 앞) 와 <name>_camera_optical_frame (z 앞, x 오른쪽, y 아래 = OpenCV/REP-103).
+    robot 노드가 내는 이미지의 header.frame_id 가 <name>_camera_optical_frame 이다 (docs/TOPICS.md).
+    위치·방향은 실측값이 아니다. 리그를 재서 xyz / rpy 를 맞출 것.
+  -->
+  <xacro:macro name="so101_camera" params="name parent xyz rpy">
+    <link name="${name}_camera_link"/>
+    <joint name="${name}_camera_joint" type="fixed">
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <parent link="${parent}"/>
+      <child link="${name}_camera_link"/>
+    </joint>
+
+    <link name="${name}_camera_optical_frame"/>
+    <joint name="${name}_camera_optical_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+      <parent link="${name}_camera_link"/>
+      <child link="${name}_camera_optical_frame"/>
+    </joint>
+  </xacro:macro>
+
+</robot>

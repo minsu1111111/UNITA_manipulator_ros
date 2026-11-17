@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
+<!--
+  원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 so101_description/urdf/so101_arm_common.xacro
+  변경: 링크·관절·전동 이름에 ${prefix} 매개변수 추가 (양팔용 left_/right_), 메시 패키지 이름 lerobot_description
+-->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="so101_arm_common"
-               params="mesh_dir:='package://so101_description/meshes' add_transmissions:='false'">
+               params="prefix:='' mesh_dir:='package://lerobot_description/meshes' add_transmissions:='false'">
 
     <!-- base_link -->
-    <link name="base_link">
+    <link name="${prefix}base_link">
       <xacro:inertial_block
         xyz="0.0137179 -5.19711e-05 0.0334843" rpy="0 0 0"
         mass="0.147"
@@ -23,7 +27,7 @@
     </link>
 
     <!-- shoulder_link -->
-    <link name="shoulder_link">
+    <link name="${prefix}shoulder_link">
       <xacro:inertial_block
         xyz="-0.0307604 -1.66727e-05 -0.0252713" rpy="0 0 0"
         mass="0.100006"
@@ -39,7 +43,7 @@
     </link>
 
     <!-- upper_arm_link -->
-    <link name="upper_arm_link">
+    <link name="${prefix}upper_arm_link">
       <xacro:inertial_block
         xyz="-0.0898471 -0.00838224 0.0184089" rpy="0 0 0"
         mass="0.103"
@@ -53,7 +57,7 @@
     </link>
 
     <!-- lower_arm_link -->
-    <link name="lower_arm_link">
+    <link name="${prefix}lower_arm_link">
       <xacro:inertial_block
         xyz="-0.0980701 0.00324376 0.0182831" rpy="0 0 0"
         mass="0.104"
@@ -69,7 +73,7 @@
     </link>
 
     <!-- wrist_link -->
-    <link name="wrist_link">
+    <link name="${prefix}wrist_link">
       <xacro:inertial_block
         xyz="-0.000103312 -0.0386143 0.0281156" rpy="0 0 0"
         mass="0.079"
@@ -83,44 +87,44 @@
     </link>
 
     <!-- joints base->wrist -->
-    <joint name="shoulder_pan" type="revolute">
+    <joint name="${prefix}shoulder_pan" type="revolute">
       <origin xyz="0.0388353 -8.97657e-09 0.0624" rpy="3.14159 4.18253e-17 -3.14159"/>
-      <parent link="base_link"/>
-      <child link="shoulder_link"/>
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}shoulder_link"/>
       <axis xyz="0 0 1"/>
       <limit effort="10" velocity="10" lower="-1.91986" upper="1.91986"/>
     </joint>
 
-    <joint name="shoulder_lift" type="revolute">
+    <joint name="${prefix}shoulder_lift" type="revolute">
       <origin xyz="-0.0303992 -0.0182778 -0.0542" rpy="-1.5708 -1.5708 0"/>
-      <parent link="shoulder_link"/>
-      <child link="upper_arm_link"/>
+      <parent link="${prefix}shoulder_link"/>
+      <child link="${prefix}upper_arm_link"/>
       <axis xyz="0 0 1"/>
       <limit effort="10" velocity="10" lower="-1.74533" upper="1.74533"/>
     </joint>
 
-    <joint name="elbow_flex" type="revolute">
+    <joint name="${prefix}elbow_flex" type="revolute">
       <origin xyz="-0.11257 -0.028 1.73763e-16" rpy="-3.63608e-16 8.74301e-16 1.5708"/>
-      <parent link="upper_arm_link"/>
-      <child link="lower_arm_link"/>
+      <parent link="${prefix}upper_arm_link"/>
+      <child link="${prefix}lower_arm_link"/>
       <axis xyz="0 0 1"/>
       <limit effort="10" velocity="10" lower="-1.69" upper="1.69"/>
     </joint>
 
-    <joint name="wrist_flex" type="revolute">
+    <joint name="${prefix}wrist_flex" type="revolute">
       <origin xyz="-0.1349 0.0052 3.62355e-17" rpy="4.02456e-15 8.67362e-16 -1.5708"/>
-      <parent link="lower_arm_link"/>
-      <child link="wrist_link"/>
+      <parent link="${prefix}lower_arm_link"/>
+      <child link="${prefix}wrist_link"/>
       <axis xyz="0 0 1"/>
       <limit effort="10" velocity="10" lower="-1.65806" upper="1.65806"/>
     </joint>
 
     <!-- OPTIONAL transmissions motor1..motor4 -->
     <xacro:if value="${add_transmissions}">
-      <xacro:simple_transmission name="shoulder_pan_trans"  joint="shoulder_pan"  actuator="motor1"/>
-      <xacro:simple_transmission name="shoulder_lift_trans" joint="shoulder_lift" actuator="motor2"/>
-      <xacro:simple_transmission name="elbow_flex_trans"    joint="elbow_flex"    actuator="motor3"/>
-      <xacro:simple_transmission name="wrist_flex_trans"    joint="wrist_flex"    actuator="motor4"/>
+      <xacro:simple_transmission name="${prefix}shoulder_pan_trans"  joint="${prefix}shoulder_pan"  actuator="motor1"/>
+      <xacro:simple_transmission name="${prefix}shoulder_lift_trans" joint="${prefix}shoulder_lift" actuator="motor2"/>
+      <xacro:simple_transmission name="${prefix}elbow_flex_trans"    joint="${prefix}elbow_flex"    actuator="motor3"/>
+      <xacro:simple_transmission name="${prefix}wrist_flex_trans"    joint="${prefix}wrist_flex"    actuator="motor4"/>
     </xacro:if>
 
   </xacro:macro>
