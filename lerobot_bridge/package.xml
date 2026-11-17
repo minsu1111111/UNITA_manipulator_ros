@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>lerobot_bridge</name>
+  <version>0.1.0</version>
+  <description>lerobot 기능을 ROS 노드로 (robot, leader, teleop). lerobot 과 만나는 유일한 패키지</description>
+  <maintainer email="kms62197724@gmail.com">UNITA Manipulation</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>builtin_interfaces</depend>
+  <depend>rcl_interfaces</depend>
+  <depend>lerobot_common</depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>python3-zmq</exec_depend>
+  <!-- mock_host.py 가 시스템 python 으로 돌 때 필요 (가짜 카메라 영상 JPEG 인코딩) -->
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <!-- 카메라 토픽 보기 -->
+  <exec_depend>rqt_image_view</exec_depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

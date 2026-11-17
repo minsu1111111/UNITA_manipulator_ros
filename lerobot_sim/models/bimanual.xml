@@ -1,0 +1,51 @@
+<!--
+  양팔 SO-101 장면. 공식 so101/so101_new_calib.xml 을 두 번 붙인다 (MuJoCo 3.2+ 의 <attach>).
+
+  좌표: 로봇 뒤에서 앞을 볼 때 정면 = +x, 왼팔 = +y, 오른팔 = -y, 테이블 면 = z 0.
+  이름: 접두사 left_ / right_ 가 붙어 관절·액추에이터 이름이 토픽 계약(docs/TOPICS.md)과 같다
+        (left_shoulder_pan … left_gripper, right_shoulder_pan … right_gripper).
+  각도: 관절값(qpos)은 rad 이고 토픽의 rad 와 같은 값이다 → robot/joint_states 를 변환 없이 qpos 에 넣는다.
+
+  팔 배치: 1자 — 두 팔이 같은 방향(+x)을 보고 y 축 위에 나란히, 받침 사이 0.45 m (간격은 실측 아님).
+  실제 리그를 재면 아래 두 frame 의 pos (간격) / euler (회전) 만 고치면 된다.
+
+  보기: lerobot_sim/README.md 의 "장면 보기"
+-->
+<mujoco model="bi_so101">
+  <compiler angle="degree"/>
+  <option timestep="0.002"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.35 0.35 0.35" specular="0 0 0"/>
+    <global azimuth="180" elevation="-25" offwidth="1280" offheight="960"/>
+  </visual>
+
+  <asset>
+    <!-- 팔 하나 모델. 메시 경로(assets/)는 이 파일 기준으로 풀린다 -->
+    <model name="so101" file="so101/so101_new_calib.xml"/>
+
+    <texture name="sky" type="skybox" builtin="gradient" rgb1="0.35 0.45 0.55" rgb2="0.05 0.05 0.08" width="256" height="1536"/>
+    <!-- 10 cm 격자 -->
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.82 0.78 0.70" rgb2="0.76 0.72 0.64" mark="edge" markrgb="0.6 0.58 0.52" width="200" height="200"/>
+    <material name="table" texture="grid" texuniform="true" texrepeat="10 10" reflectance="0"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0.3 0 1.5" dir="0 0 -1" directional="true" castshadow="true" diffuse="0.6 0.6 0.6"/>
+    <geom name="table" type="plane" size="1 1 0.05" pos="0.25 0 0" material="table"/>
+
+    <!-- 왼팔: +y 쪽, 정면(+x)을 봄 -->
+    <frame name="left_mount" pos="0 0.225 0" euler="0 0 0">
+      <attach model="so101" body="base" prefix="left_"/>
+    </frame>
+    <!-- 오른팔: -y 쪽, 정면(+x)을 봄 -->
+    <frame name="right_mount" pos="0 -0.225 0" euler="0 0 0">
+      <attach model="so101" body="base" prefix="right_"/>
+    </frame>
+
+    <!-- 고정 카메라 (보기용 자리표시. 실제 top 카메라 위치를 재면 맞출 것. 손목 카메라는 아직 없음) -->
+    <camera name="front" pos="0.95 0 0.62" xyaxes="0 1 0 -0.55 0 0.83"/>
+    <camera name="top" pos="0.30 0 1.05" xyaxes="0 1 0 -1 0 0"/>
+    <camera name="side" pos="0.25 -0.95 0.45" xyaxes="1 0 0 0 0.4 0.92"/>
+  </worldbody>
+</mujoco>

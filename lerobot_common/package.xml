@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>lerobot_common</name>
+  <version>0.1.0</version>
+  <description>공용: 관절 이름, 토픽 이름, QoS, lerobot 단위 ↔ rad 변환, robot.env 읽기</description>
+  <maintainer email="kms62197724@gmail.com">UNITA Manipulation</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

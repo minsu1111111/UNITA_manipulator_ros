@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <!-- 복사하면 바꿀 곳: name, description, maintainer (setup.py / setup.cfg / resource/ 파일 이름도) -->
+  <name>lerobot_template</name>
+  <version>0.1.0</version>
+  <description>새 패키지를 만들 때 복사하는 예제 (joint_speed 노드)</description>
+  <maintainer email="kms62197724@gmail.com">UNITA Manipulation</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>lerobot_common</depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

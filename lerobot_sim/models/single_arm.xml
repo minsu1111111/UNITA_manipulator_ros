@@ -1,0 +1,35 @@
+<!--
+  단팔 SO-101 장면. 접두사 없이 붙여서 관절 이름이 단팔 토픽 계약과 같다
+  (shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll, gripper).
+
+  보기: lerobot_sim/README.md 의 "장면 보기"
+-->
+<mujoco model="so101_single">
+  <compiler angle="degree"/>
+  <option timestep="0.002"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.35 0.35 0.35" specular="0 0 0"/>
+    <global azimuth="160" elevation="-20" offwidth="1280" offheight="960"/>
+  </visual>
+
+  <asset>
+    <model name="so101" file="so101/so101_new_calib.xml"/>
+
+    <texture name="sky" type="skybox" builtin="gradient" rgb1="0.35 0.45 0.55" rgb2="0.05 0.05 0.08" width="256" height="1536"/>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.82 0.78 0.70" rgb2="0.76 0.72 0.64" mark="edge" markrgb="0.6 0.58 0.52" width="200" height="200"/>
+    <material name="table" texture="grid" texuniform="true" texrepeat="10 10" reflectance="0"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0.3 0 1.5" dir="0 0 -1" directional="true" castshadow="true" diffuse="0.6 0.6 0.6"/>
+    <geom name="table" type="plane" size="1 1 0.05" pos="0.25 0 0" material="table"/>
+
+    <frame name="mount" pos="0 0 0">
+      <attach model="so101" body="base" prefix=""/>
+    </frame>
+
+    <camera name="front" pos="0.75 0 0.45" xyaxes="0 1 0 -0.5 0 0.87"/>
+    <camera name="top" pos="0.25 0 0.9" xyaxes="0 1 0 -1 0 0"/>
+  </worldbody>
+</mujoco>

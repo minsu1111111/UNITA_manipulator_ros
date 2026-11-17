@@ -1,0 +1,12 @@
+# 린트/포맷 설정 (lerobot_pac 과 같은 규칙). colcon 은 이 파일을 보지 않는다.
+target-version = "py310"   # ROS2 Humble 쪽 python. hw_host/ 는 3.12 에서 돌지만 3.10 문법 안에서 쓴다
+line-length = 110
+extend-exclude = ["build", "install", "log"]
+
+[lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4"]
+ignore = ["E501", "E731", "B905", "C408", "SIM105", "SIM108"]
+
+[lint.isort]
+combine-as-imports = true
+known-first-party = ["lerobot_common", "lerobot_bridge", "lerobot_template"]

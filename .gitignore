@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
+# PC 별 리그 설정 (예시는 config/robot.env.example)
+config/robot.env
+# 저장소 폴더에서 바로 colcon build 했을 때 (권장은 ~/ros2_ws)
+build/
+install/
+log/
