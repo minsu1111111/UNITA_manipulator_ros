@@ -1,3 +1,7 @@
+// 원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 episode_recorder/include/episode_recorder/episode_recorder.hpp
+// 변경:
+//   - auto_cameras_ 멤버 추가
+
 
 #ifndef EPISODE_RECORDER__EPISODE_RECORDER_HPP_
 #define EPISODE_RECORDER__EPISODE_RECORDER_HPP_
@@ -60,6 +64,8 @@ private:
   std::unordered_map<std::string, std::chrono::steady_clock::time_point> last_rx_;
   rclcpp::TimerBase::SharedPtr discovery_timer_;
   double start_gate_max_age_s_ = 0.5;
+  // [UNITA] topics 를 비워 두면 /robot/cam/<name>/image/compressed 를 그래프에서 찾아 자동으로 더한다
+  bool auto_cameras_{false};
 
   void resolve_topic_types();
   void create_subscriptions();

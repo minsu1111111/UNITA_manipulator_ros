@@ -13,6 +13,8 @@ SO-101 리더·팔로워를 ROS2 로 돌리는 스택에서 우리에게 참고�
 | 원본 | 우리 패키지 |
 |---|---|
 | `so101_description` | [`lerobot_description`](../../lerobot_description/) (양팔용 prefix, 카메라 프레임, `state_publisher`) |
+| `episode_recorder` | [`lerobot_recorder`](../../lerobot_recorder/) (`ros2 run` 으로 바로 활성화, 기본 토픽·카메라 자동 탐색) |
+| `rosbag_to_lerobot` | [`lerobot_dataset`](../../lerobot_dataset/) (ROS 읽기 / lerobot 쓰기 분리, lerobot-record 와 같은 형식) |
 
 ## 원본에서 바꾼 것
 
@@ -41,8 +43,6 @@ Humble(이 저장소 기준 PC)에서 확인한 것만 적었다. "빌드" 는 H
 | `so101_kinematics` (+ `so101_kinematics_msgs`) | IK 제어, 직교 좌표 이동, 궤적 실행 노드 | 빌드 ✅. 실행에 `robokin`, `viser` (pip) 와 `so101_bringup` 필요 | IK 연습 |
 | `so101_inference` | ACT·SmolVLA 추론 노드 (동기), 원격 서버에 붙는 비동기 클라이언트 (ZMQ·gRPC) | 빌드 ✅. ROS 노드 안에서 lerobot 을 import 하므로 Humble 에서는 그대로 못 돈다 | `policy` 노드 설계 — 우리 구조에선 lerobot 부분을 호스트로 분리 |
 | `policy_server` | 원격 GPU 에서 lerobot 정책을 띄워 ZMQ·gRPC 로 행동을 주는 서버 (ROS 아님) | 의존성: torch·pyzmq·grpcio 는 우리 lerobot env 에 있고 `msgpack` 만 없음. 실행은 확인 안 함 | `policy` — 원격 GPU 추론 쪽 |
-| `rosbag_to_lerobot` | rosbag(MCAP) → LeRobotDataset v3.0 변환 | 빌드 ✅. 한 프로세스에서 `rosbag2_py` 와 lerobot 을 같이 import → Humble 에서는 그대로 못 돈다 | `record` 단계 |
-| `episode_recorder` | MCAP 에피소드 녹화 노드(C++), 키보드로 시작·저장·버리기 | 빌드 ✅. 실행에 MCAP 저장 플러그인 필요 (`sudo apt install ros-humble-rosbag2-storage-mcap`) | `record`, 조작자 입력 |
 
 ## 가져다 쓸 때
 

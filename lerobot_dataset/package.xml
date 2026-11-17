@@ -1,23 +1,22 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rosbag_to_lerobot</name>
+  <name>lerobot_dataset</name>
   <version>0.1.0</version>
-  <description>Convert ROS 2 bag files (MCAP) to LeRobot datasets</description>
-  <maintainer email="dmitri@manajev.com">Dmitri Manajev</maintainer>
+  <description>녹화한 rosbag 에피소드 → LeRobotDataset (lerobot-record 와 같은 형식). so101-ros-physical-ai 의 rosbag_to_lerobot 을 옮겨 옴</description>
+  <maintainer email="kms62197724@gmail.com">UNITA Manipulation</maintainer>
   <license>Apache-2.0</license>
 
-  <exec_depend>rclpy</exec_depend>
+  <depend>rclpy</depend>
+  <depend>lerobot_common</depend>
+  <depend>lerobot_bridge</depend>
   <exec_depend>rosbag2_py</exec_depend>
   <exec_depend>rosidl_runtime_py</exec_depend>
-
+  <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
 
-
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
 
   <export>

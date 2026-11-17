@@ -1,30 +1,24 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>episode_recorder</name>
+  <name>lerobot_recorder</name>
   <version>0.1.0</version>
-  <description>Minimalistic ROS2 episode recorder for imitation learning. 
-    Records rosbags (MCAP) from configurable topics with keyboard-driven episode control.</description>
-  <maintainer email="dmitri@manajev.com">Dmitri Manajev</maintainer>
+  <description>에피소드 녹화 (rosbag2) + 키보드 조작. so101-ros-physical-ai 의 episode_recorder 를 옮겨 옴</description>
+  <maintainer email="kms62197724@gmail.com">UNITA Manipulation</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <!-- ROS 2 core -->
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>lifecycle_msgs</depend>
   <depend>std_srvs</depend>
-
-  <!-- Bag recording -->
+  <depend>rcl_interfaces</depend>
   <depend>yaml-cpp</depend>
   <depend>rosbag2_cpp</depend>
   <depend>rosbag2_storage</depend>
-  <exec_depend>rosbag2_storage_mcap</exec_depend>
-
-  <!-- Testing -->
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+  <!-- 기본 저장 형식 sqlite3 플러그인. mcap 을 쓰려면 ros-humble-rosbag2-storage-mcap 을 따로 설치 -->
+  <exec_depend>rosbag2_storage_default_plugins</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

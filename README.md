@@ -26,6 +26,8 @@ UNITA_manipulator_ros/
 │   └── hosts/                모터·카메라를 실제로 다루는 쪽: hw_host (lerobot env), mock_host (lerobot 불필요)
 ├── lerobot_template/         새 패키지를 만들 때 복사하는 예제 (joint_speed 노드 + 테스트)
 ├── lerobot_description/      SO-101 URDF·메시·카메라 프레임·RViz 설정. robot/joint_states → TF (state_publisher)
+├── lerobot_recorder/         에피소드 녹화 (rosbag2) + 키보드 시작·저장·버리기
+├── lerobot_dataset/          녹화한 에피소드 → LeRobotDataset (lerobot-record 와 같은 형식)
 ├── lerobot_sim/              MuJoCo 장면 (SO-101 단팔·양팔, 이름·단위가 토픽 계약과 같음). 노드는 아직 없음
 └── reference/                외부 참고 코드 원본 (빌드 제외). 가져다 쓸 때 우리 패키지로 옮겨서 고친다
 ```
@@ -98,6 +100,7 @@ ros2 topic echo /robot/joint_states
 | `find_ports` | `true` | robot.env 의 `*_SERIAL` 로 ttyACM 을 직접 찾기 |
 | `cameras` | `true` | robot 만. `false` 면 카메라 없이 |
 | `max_rel` | `0` | robot 만. 스텝당 최대 변화(도), 0 = 끔 |
+| `camera_fps` / `jpeg_quality` | `30` / `90` | robot 만. 카메라 토픽 주기와 JPEG 품질 (녹화하려면 30 = 데이터셋 fps) |
 | `fps` | `60` | 호스트 루프 주기 |
 | `spawn_host` / `zmq_host` / `bind` | `true` / `127.0.0.1` / `127.0.0.1` | 호스트를 다른 PC 에서 돌릴 때 (`ros2 run lerobot_bridge host …` + `spawn_host:=false zmq_host:=<IP>`) |
 
@@ -114,6 +117,25 @@ ros2 run rviz2 rviz2 -d $(ros2 pkg prefix lerobot_description)/share/lerobot_des
 
 단팔은 `state_publisher single` + `single.rviz`. 리더 팔 보기, 팔 간격·카메라 옵션은 [lerobot_description/README.md](lerobot_description/README.md).
 
+## 녹화 → 데이터셋 (= `lerobot-record`)
+
+텔레옵이 떠 있는 상태에서:
+
+```bash
+ros2 run lerobot_recorder recorder --ros-args -p experiment_name:=pour_water -p task:="Pick up the cup and pour water"
+```
+```bash
+ros2 run lerobot_recorder keyboard
+```
+
+`r` 녹화 시작, `s` 저장, `d` 버리기. 에피소드는 `~/ros_episodes/pour_water/episode_*` 에 쌓인다. 다 모으면 (lerobot env 가 있는 PC 에서):
+
+```bash
+ros2 run lerobot_dataset convert ~/ros_episodes/pour_water --repo-id local/pour_water
+```
+
+결과는 `lerobot-record` 로 모은 데이터셋과 같은 형식이라 `lerobot-train` 에 바로 넣는다. 자세한 건 [lerobot_recorder](lerobot_recorder/README.md), [lerobot_dataset](lerobot_dataset/README.md).
+
 ## lerobot 명령과의 대응
 
 | lerobot | 여기서 | 상태 |
@@ -121,7 +143,7 @@ ros2 run rviz2 rviz2 -d $(ros2 pkg prefix lerobot_description)/share/lerobot_des
 | `lerobot-teleoperate` | `robot` + `leader` + `teleop` | ✅ |
 | `lerobot-replay` | `robot` + `replay` (데이터셋을 로봇처럼 재생 — 로봇 없이 실제 영상으로 개발) | 다음 |
 | `lerobot-rollout` (SmolVLA·ACT 등) | `robot` + `policy` + `safety` | 다음 |
-| `lerobot-record` | `robot` + `leader` + `teleop` + `record` | 마지막 (수집은 당분간 `lerobot-record` 그대로) |
+| `lerobot-record` | `robot` + `leader` + `teleop` + `lerobot_recorder` → `lerobot_dataset convert` | ✅ (mock 으로 검증, 실기 전) |
 | `lerobot-calibrate`, `lerobot-setup-motors`, `lerobot-train` | lerobot 그대로 | ROS 화하지 않음 |
 
 ## 규칙
@@ -147,13 +169,13 @@ MoveIt 2·녹화·데이터셋 변환·정책 추론까지 있다. 구조를 그
 - Ubuntu 24.04 + ROS2 Jazzy 기준 (우리는 22.04 + Humble)
 - 리더 1 + 팔로워 1 만 지원 (우리는 양팔이 기본)
 - lerobot 을 모터 구동에 쓰지 않는다 → 관절값 단위·캘리브레이션이 lerobot 데이터셋과 같은지 따로 확인해야 한다
-- 수집도 ROS 녹화 → 변환 방식 (우리는 당분간 `lerobot-record`)
+- 수집은 ROS 녹화 → 변환 방식 (우리는 이걸 `lerobot_recorder` / `lerobot_dataset` 으로 옮겼고, `lerobot-record` 도 그대로 쓸 수 있다)
 
 | 그쪽 패키지 | 볼 만한 것 | 우리 쪽 |
 |---|---|---|
 | `so101_description` | SO-101 URDF/Xacro·메시 | `lerobot_description` 으로 옮김 ✅ |
-| `episode_recorder` | MCAP 녹화, 키보드로 시작·저장·버리기 | `record`, `lerobot_operator` |
-| `rosbag_to_lerobot` | rosbag(MCAP) → LeRobotDataset v3.0 변환 | `record` |
+| `episode_recorder` | MCAP 녹화, 키보드로 시작·저장·버리기 | `lerobot_recorder` 로 옮김 ✅ |
+| `rosbag_to_lerobot` | rosbag(MCAP) → LeRobotDataset v3.0 변환 | `lerobot_dataset` 으로 옮김 ✅ |
 | `so101_inference`, `policy_server` | ACT·SmolVLA 추론, 원격 GPU 추론 서버 (ZMQ / gRPC) | `policy` |
 | `so101_bringup` | ros2_control 설정, 카메라(USB·RealSense) TF 배치 | `lerobot_description`, `lerobot_perception` |
 | `so101_moveit_config`, `so101_kinematics` | MoveIt 2 설정, IK | 매니퓰레이션 (MoveIt) |
@@ -169,12 +191,13 @@ MoveIt 2·녹화·데이터셋 변환·정책 추론까지 있다. 구조를 그
 
 리그를 연결하지 않은 상태에서 확인한 것:
 
-- `mock:=true` 텔레옵 (robot, leader, teleop) — **lerobot 이 없는 시스템 python 만으로** 관절 토픽 각 ≈60 Hz, 카메라 15 Hz
+- `mock:=true` 텔레옵 (robot, leader, teleop) — **lerobot 이 없는 시스템 python 만으로** 관절 토픽 각 ≈60 Hz, 카메라 30 Hz
 - 단위: 몸통 ±0.524 rad (= mock ±30°), gripper [-0.175, 1.745] rad (= URDF 범위). 리더→로봇 잔차 0, 지연 최대 17 ms
 - Ctrl+C: 노드·호스트 모두 정상 종료. 노드를 SIGKILL 해도 호스트가 따라 종료 (토크 남지 않음)
 - 다른 PC 흉내: lerobot env 가 없을 때, 캘리 파일이 없을 때 → Traceback 없이 해결 방법 한 줄로 멈춤 (모터는 열지 않음)
 - `rosdep install` 이 모든 의존성을 풀어냄, XML 파일 전부 well-formed, `colcon test` 통과
 - 시뮬 장면: 단팔·양팔 모두 MuJoCo 3.8.1 에서 열리고 관절·액추에이터 이름이 토픽 계약과 같음
 - 로봇 모델: URDF 와 MuJoCo 장면이 같은 관절값에서 링크 위치 0.002 mm 이내로 같음 (단팔·양팔). mock 로봇 + `state_publisher` 로 TF 가 관절을 따라 움직임
+- 녹화·변환: mock 텔레옵을 키보드로 녹화(저장·버리기) → 변환한 데이터셋의 `info.json` 특징 정의가 `lerobot-record` 양팔 데이터셋과 같음. 단위(도·0~100)·영상 색(RGB)·미래 값 미사용 확인
 
 실제 모터로는 아직 안 돌려봄. 첫 실기: `-p arm:=left -p cameras:=false -p max_rel:=20` 부터 ([SETUP.md 6번](docs/SETUP.md#6-로봇-pc-만--lerobot-robotenv-캘리브레이션)).

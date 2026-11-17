@@ -1,7 +1,13 @@
 # 린트/포맷 설정 (lerobot_pac 과 같은 규칙). colcon 은 이 파일을 보지 않는다.
 target-version = "py310"   # ROS2 Humble 쪽 python. hw_host/ 는 3.12 에서 돌지만 3.10 문법 안에서 쓴다
 line-length = 110
-extend-exclude = ["build", "install", "log", "reference"]  # reference/ = 외부 원본 코드, 우리 규칙을 적용하지 않음
+extend-exclude = [
+  "build", "install", "log",
+  "reference",  # 외부 원본 코드, 우리 규칙을 적용하지 않음
+  # 외부에서 그대로 가져온 파일 (원본과 같게 유지)
+  "lerobot_dataset/lerobot_dataset/buffers.py",
+  "lerobot_dataset/lerobot_dataset/bag_reader.py",
+]
 
 [lint]
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4"]

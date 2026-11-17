@@ -23,6 +23,8 @@
   state_port / cmd_port   ZMQ 포트 (robot 5556/5557, leader 5555)
   cameras     robot 만: false 면 카메라 없이       (기본 true)
   max_rel     robot 만: 스텝당 최대 변화(도). 0 이면 끔. 처음 붙일 땐 20 권장
+  camera_fps  robot 만: 카메라 토픽 주기 (기본 30 = 데이터셋 fps)
+  jpeg_quality robot 만: 카메라 JPEG 품질 1~100 (기본 90)
 """
 
 import contextlib
@@ -78,6 +80,9 @@ class HwBridge(Node):
             cameras = p("cameras", True).value
             # `-p max_rel:=20` 은 INTEGER 로 들어오는데 0.0 으로 선언하면 DOUBLE 이라 거부된다 → 둘 다 받게
             max_rel = float(p("max_rel", 0.0, ParameterDescriptor(dynamic_typing=True)).value)
+            # 카메라 토픽 주기. 데이터셋(30 fps)으로 녹화하려면 30 이어야 같은 이미지가 반복되지 않는다
+            camera_fps = p("camera_fps", 30).value
+            jpeg_quality = p("jpeg_quality", 90).value
         if arm not in ARMS:
             raise ValueError(f"arm 은 {ARMS} 중 하나 (받은 값: {arm!r})")
 
@@ -98,6 +103,7 @@ class HwBridge(Node):
                 plan = robot_plan(
                     arm, rig, mock=mock, cameras=cameras, max_rel=max_rel,
                     fps=fps, bind=bind, state_port=state_port, cmd_port=cmd_port,
+                    camera_fps=camera_fps, jpeg_quality=jpeg_quality,
                 )  # fmt: skip
             else:
                 plan = leader_plan(arm, rig, mock=mock, fps=fps, bind=bind, state_port=state_port)

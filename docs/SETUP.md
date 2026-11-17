@@ -141,6 +141,8 @@ conda activate lerobot && conda install -y -c conda-forge ffmpeg
 git clone https://github.com/minsu1111111/Unita_lerobot.git ~/lerobot && cd ~/lerobot && pip install -e ".[feetech]"
 ```
 
+녹화한 에피소드를 데이터셋으로 바꾸는 PC(`ros2 run lerobot_dataset convert`)에도 lerobot 이 필요하다 — 로봇 PC 에서 바꾸는 게 보통이다.
+
 노드는 lerobot env 의 python 을 자동으로 찾는다 (conda 의 `envs/lerobot`). 다른 이름·위치에 설치했으면 robot.env 의 `LEROBOT_PY` 에 적는다
 (`conda activate lerobot && which python` 으로 경로 확인).
 

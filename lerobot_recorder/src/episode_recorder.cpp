@@ -1,6 +1,16 @@
+// 원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 episode_recorder/src/episode_recorder.cpp
+// 변경:
+//   - root_dir 기본값: /tmp/episode_recorder → $HOME/ros_episodes
+//   - storage_id 기본값: mcap → sqlite3 (Humble 기본 플러그인)
+//   - task 가 비어도 configure 는 통과 (녹화 시작 때 검사는 원본 그대로)
+//   - topics 를 비우면 /robot/joint_states, /robot/command + /robot/cam/*/image/compressed 자동 탐색
+
 
 
 #include "episode_recorder/episode_recorder.hpp"
+
+#include <algorithm>
+#include <cstdlib>
 
 #include <chrono>
 #include <cstring>
@@ -23,8 +33,8 @@ EpisodeRecorder::EpisodeRecorder(const rclcpp::NodeOptions &options)
     : rclcpp_lifecycle::LifecycleNode("episode_recorder", options) {
   // Declare parameters
   this->declare_parameter<std::vector<std::string>>("topics", std::vector<std::string>{});
-  this->declare_parameter<std::string>("root_dir", "/tmp/episode_recorder");
-  this->declare_parameter<std::string>("storage_id", "mcap");
+  this->declare_parameter<std::string>("root_dir", "");  // [UNITA] 비우면 $HOME/ros_episodes
+  this->declare_parameter<std::string>("storage_id", "sqlite3");  // [UNITA] Humble 기본. mcap 은 ros-humble-rosbag2-storage-mcap 필요
   this->declare_parameter<double>("max_episode_duration", 0.0);
   this->declare_parameter<std::string>("experiment_name", "");
   this->declare_parameter<std::string>("task", "");
@@ -62,17 +72,19 @@ EpisodeRecorder::on_configure(const rclcpp_lifecycle::State & /*state*/) {
     );
   }
 
+  // [UNITA] task 는 녹화를 시작할 때 필요하다 (-p task:=... 또는 키보드 t / ros2 param set 으로 나중에)
   if (task_.empty()) {
-    RCLCPP_ERROR(get_logger(), "Parameter 'task' is empty. Provide via launch: task:=<name>");
-    return CallbackReturn::FAILURE;
+    RCLCPP_WARN(get_logger(), "Parameter 'task' is empty — set it before recording (-p task:=\"...\" or key 't')");
   }
+  // [UNITA] topics 를 비우면 우리 토픽 계약의 기본값 + 카메라 자동 탐색
   if (topics_.empty()) {
-    RCLCPP_ERROR(get_logger(), "Parameter 'topics' is empty - nothing to record");
-    return CallbackReturn::FAILURE;
+    topics_ = {"/robot/joint_states", "/robot/command"};
+    auto_cameras_ = true;
+    RCLCPP_INFO(get_logger(), "Default topics: /robot/joint_states, /robot/command + /robot/cam/*/image/compressed");
   }
   if (root_dir_.empty()) {
-    RCLCPP_ERROR(get_logger(), "Parameter 'root_dir' is empty");
-    return CallbackReturn::FAILURE;
+    const char *home = std::getenv("HOME");
+    root_dir_ = std::string(home ? home : ".") + "/ros_episodes";
   }
 
   // Build effective output directory: root_dir / experiment_name (if set)
@@ -487,6 +499,18 @@ void EpisodeRecorder::on_message_received(const std::string &topic, const std::s
 void EpisodeRecorder::resolve_topic_types() {
   topic_type_map_.clear();
   auto names_and_types = this->get_topic_names_and_types();
+
+  // [UNITA] 카메라 자동 탐색 — robot 노드는 첫 프레임이 올 때 카메라 토픽을 만들므로 녹화 시작 때마다 다시 찾는다
+  if (auto_cameras_) {
+    static const std::regex cam_re(R"(^/robot/cam/[^/]+/image/compressed$)");
+    for (const auto &[name, types] : names_and_types) {
+      if (std::regex_match(name, cam_re) &&
+          std::find(topics_.begin(), topics_.end(), name) == topics_.end()) {
+        topics_.push_back(name);
+        RCLCPP_INFO(get_logger(), "Camera topic found: %s", name.c_str());
+      }
+    }
+  }
 
   for (const auto &topic : topics_) {
     auto it = names_and_types.find(topic);
