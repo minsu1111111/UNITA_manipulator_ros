@@ -25,19 +25,19 @@ UNITA_manipulator_ros/
 │   ├── lerobot_bridge/       ROS 노드: robot, leader, teleop
 │   └── hosts/                모터·카메라를 실제로 다루는 쪽: hw_host (lerobot env), mock_host (lerobot 불필요)
 ├── lerobot_template/         새 패키지를 만들 때 복사하는 예제 (joint_speed 노드 + 테스트)
-└── lerobot_sim/              MuJoCo 장면 (SO-101 단팔·양팔, 이름·단위가 토픽 계약과 같음). 노드는 시뮬 담당
+└── lerobot_sim/              MuJoCo 장면 (SO-101 단팔·양팔, 이름·단위가 토픽 계약과 같음). 노드는 아직 없음
 ```
 
 앞으로 붙을 패키지 (각자 `lerobot_template` 을 복사해서 시작, [CONTRIBUTING.md](docs/CONTRIBUTING.md)):
 
-| 패키지 | 담당 | 내용 |
-|---|---|---|
-| `lerobot_sim` | 시뮬 | 장면은 있음. `robot/joint_states`·카메라를 내고 `robot/command` 를 받는 노드 ([lerobot_sim/README.md](lerobot_sim/README.md)) |
-| `lerobot_description` | 모델링 | SO-101 URDF·메시·RViz 설정, `robot_state_publisher` |
-| `lerobot_perception` | 비전 | 카메라 토픽 → 물체 인식 결과 |
-| `lerobot_speech` | 음성 | STT → `speech/command`, `speech/say` → TTS |
-| `lerobot_safety` | 기본 틀 | 정책과 로봇 사이 안전 게이트 (스텝 제한, 비상정지) |
-| `lerobot_task` / `lerobot_operator` / `lerobot_interfaces` | 기본 틀 | 과제 흐름·성공 판정 / 시작·정지 입력 / 커스텀 메시지 |
+| 패키지 | 내용 |
+|---|---|
+| `lerobot_sim` | 장면은 있음. `robot/joint_states`·카메라를 내고 `robot/command` 를 받는 노드 ([lerobot_sim/README.md](lerobot_sim/README.md)) |
+| `lerobot_description` | SO-101 URDF·메시·RViz 설정, `robot_state_publisher` |
+| `lerobot_perception` | 카메라 토픽 → 물체 인식 결과 |
+| `lerobot_speech` | STT → `speech/command`, `speech/say` → TTS |
+| `lerobot_safety` | 정책과 로봇 사이 안전 게이트 (스텝 제한, 비상정지) |
+| `lerobot_task` / `lerobot_operator` / `lerobot_interfaces` | 과제 흐름·성공 판정 / 시작·정지 입력 / 커스텀 메시지 |
 
 ## 노드 그래프
 
@@ -116,9 +116,41 @@ ros2 topic echo /robot/joint_states
 2. `robot/command` 를 발행하는 노드는 하나뿐이다 (지금 `teleop`, 정책이 붙으면 `safety`).
 3. 토픽을 추가·변경하면 `docs/TOPICS.md` 를 먼저 고친다. 단위는 rad.
 
+## 참고 자료
+
+### so101-ros-physical-ai
+
+https://github.com/legalaspro/so101-ros-physical-ai (Apache-2.0)
+
+SO-101 리더·팔로워를 ROS2 로 돌리는 스택. 모터를 lerobot 대신 자체 C++ ros2_control 드라이버로 구동하고,
+MoveIt 2·녹화·데이터셋 변환·정책 추론까지 있다. 구조를 그대로 쓰지 않고, 해당 부분을 만들 때 설계를 참고한다.
+
+우리와 다른 점 (가져올 때 주의):
+
+- Ubuntu 24.04 + ROS2 Jazzy 기준 (우리는 22.04 + Humble)
+- 리더 1 + 팔로워 1 만 지원 (우리는 양팔이 기본)
+- lerobot 을 모터 구동에 쓰지 않는다 → 관절값 단위·캘리브레이션이 lerobot 데이터셋과 같은지 따로 확인해야 한다
+- 수집도 ROS 녹화 → 변환 방식 (우리는 당분간 `lerobot-record`)
+
+| 그쪽 패키지 | 볼 만한 것 | 우리 쪽 |
+|---|---|---|
+| `so101_description` | SO-101 URDF/Xacro·메시 | `lerobot_description` |
+| `episode_recorder` | MCAP 녹화, 키보드로 시작·저장·버리기 | `record`, `lerobot_operator` |
+| `rosbag_to_lerobot` | rosbag(MCAP) → LeRobotDataset v3.0 변환 | `record` |
+| `so101_inference`, `policy_server` | ACT·SmolVLA 추론, 원격 GPU 추론 서버 (ZMQ / gRPC) | `policy` |
+| `so101_bringup` | ros2_control 설정, 카메라(USB·RealSense) TF 배치 | `lerobot_description`, `lerobot_perception` |
+| `so101_moveit_config`, `so101_kinematics` | MoveIt 2 설정, IK | 매니퓰레이션 (MoveIt) |
+
+가져온 코드·파일은 Apache-2.0 이므로 출처를 남긴다 (파일 머리 주석이나 그 폴더 README).
+
+### 그 밖에
+
+- lerobot 의 `async_inference` (`policy_server.py`, `robot_client.py`): 정책을 원격 GPU 에서 돌리고 로봇 PC 로 행동을 받는 lerobot 자체 구현. `policy` 노드의 기본 재료.
+- SO-101 공식 모델 (TheRobotStudio/SO-ARM100, Apache-2.0): MJCF·메시가 `lerobot_sim/models/so101/` 에 들어 있다. URDF 는 원본 저장소의 `Simulation/SO101` 에 있다.
+
 ## 검증 기록
 
-2026-11-17, 리그 미연결 상태에서:
+리그를 연결하지 않은 상태에서 확인한 것:
 
 - `mock:=true` 텔레옵 (robot, leader, teleop) — **lerobot 이 없는 시스템 python 만으로** 관절 토픽 각 ≈60 Hz, 카메라 15 Hz
 - 단위: 몸통 ±0.524 rad (= mock ±30°), gripper [-0.175, 1.745] rad (= URDF 범위). 리더→로봇 잔차 0, 지연 최대 17 ms

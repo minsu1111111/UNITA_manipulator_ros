@@ -55,7 +55,7 @@ lerobot 단위가 필요한 곳(정책 입력, 데이터셋)에서만 `lerobot_c
 | `safety/estop` | `std_msgs/Bool` (EVENT) | operator, speech → safety | 비상정지 |
 | `speech/command` | `std_msgs/String` (EVENT) | speech | 인식한 명령 |
 | `speech/say` | `std_msgs/String` (EVENT) | 누구나 → speech | 읽을 문구 |
-| `perception/objects` | 미정 | perception | 비전 담당이 타입을 제안해 이 표에 적는다 |
+| `perception/objects` | 미정 | perception | 인식 노드를 만들 때 타입을 정해 이 표에 적는다 |
 
 ## 규칙
 
