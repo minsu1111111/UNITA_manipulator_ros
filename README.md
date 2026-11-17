@@ -25,7 +25,8 @@ UNITA_manipulator_ros/
 │   ├── lerobot_bridge/       ROS 노드: robot, leader, teleop
 │   └── hosts/                모터·카메라를 실제로 다루는 쪽: hw_host (lerobot env), mock_host (lerobot 불필요)
 ├── lerobot_template/         새 패키지를 만들 때 복사하는 예제 (joint_speed 노드 + 테스트)
-└── lerobot_sim/              MuJoCo 장면 (SO-101 단팔·양팔, 이름·단위가 토픽 계약과 같음). 노드는 아직 없음
+├── lerobot_sim/              MuJoCo 장면 (SO-101 단팔·양팔, 이름·단위가 토픽 계약과 같음). 노드는 아직 없음
+└── reference/                외부 참고 코드 원본 (빌드 제외). 가져다 쓸 때 우리 패키지로 옮겨서 고친다
 ```
 
 앞으로 붙을 패키지 (각자 `lerobot_template` 을 복사해서 시작, [CONTRIBUTING.md](docs/CONTRIBUTING.md)):
@@ -125,6 +126,9 @@ https://github.com/legalaspro/so101-ros-physical-ai (Apache-2.0)
 SO-101 리더·팔로워를 ROS2 로 돌리는 스택. 모터를 lerobot 대신 자체 C++ ros2_control 드라이버로 구동하고,
 MoveIt 2·녹화·데이터셋 변환·정책 추론까지 있다. 구조를 그대로 쓰지 않고, 해당 부분을 만들 때 설계를 참고한다.
 
+아래 패키지의 원본 코드가 [`reference/so101-ros-physical-ai/`](reference/so101-ros-physical-ai/) 에 있다 (빌드 제외).
+패키지마다 Humble 에서 빌드·실행되는지, 가져다 쓸 때의 절차는 그 폴더 README 에 있다.
+
 우리와 다른 점 (가져올 때 주의):
 
 - Ubuntu 24.04 + ROS2 Jazzy 기준 (우리는 22.04 + Humble)
@@ -141,7 +145,7 @@ MoveIt 2·녹화·데이터셋 변환·정책 추론까지 있다. 구조를 그
 | `so101_bringup` | ros2_control 설정, 카메라(USB·RealSense) TF 배치 | `lerobot_description`, `lerobot_perception` |
 | `so101_moveit_config`, `so101_kinematics` | MoveIt 2 설정, IK | 매니퓰레이션 (MoveIt) |
 
-가져온 코드·파일은 Apache-2.0 이므로 출처를 남긴다 (파일 머리 주석이나 그 폴더 README).
+`reference/` 의 파일은 고치지 않고, 필요한 부분을 우리 패키지로 복사해서 고친다. Apache-2.0 이므로 복사한 곳에 출처를 남긴다.
 
 ### 그 밖에
 
