@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!--
+  양팔 SO-101. 관절 이름 = 토픽 계약 (left_shoulder_pan … right_gripper), 관절값 = robot/joint_states 의 rad.
+  배치는 lerobot_sim/models/bimanual.xml 과 같다: 1자, 두 팔 모두 정면(+x), 받침 사이 spacing (기본 0.45 m, 실측 아님).
+
+  인자 (xacro 파일 이름:=값):
+    variant   follower | leader       (기본 follower. leader/joint_states 를 볼 때 leader)
+    spacing   두 받침 사이 거리 [m]   (기본 0.45)
+    cameras   true | false            (기본 true. top / left_wrist / right_wrist 카메라 프레임)
+-->
+<robot name="so101_bimanual" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="variant" default="follower"/>
+  <xacro:arg name="spacing" default="0.45"/>
+  <xacro:arg name="cameras" default="true"/>
+  <xacro:property name="variant" value="$(arg variant)"/>
+  <xacro:property name="half" value="${$(arg spacing) / 2}"/>
+
+  <xacro:include filename="$(find lerobot_description)/urdf/so101_macros.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/so101_materials.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/so101_arm_common.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/end_effectors/so101_ee_common.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/end_effectors/so101_ee_follower.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/end_effectors/so101_ee_leader.xacro"/>
+  <xacro:include filename="$(find lerobot_description)/urdf/so101_cameras.xacro"/>
+
+  <xacro:so101_materials/>
+  <link name="world"/>
+
+  <!-- 팔 하나: <side>_base_link … <side>_gripper_link, 관절 <side>_shoulder_pan … -->
+  <xacro:macro name="arm" params="side y">
+    <xacro:so101_arm_common prefix="${side}_"/>
+    <xacro:if value="${variant == 'follower'}">
+      <xacro:so101_ee_follower prefix="${side}_"/>
+    </xacro:if>
+    <xacro:if value="${variant == 'leader'}">
+      <xacro:so101_ee_leader prefix="${side}_"/>
+    </xacro:if>
+    <joint name="${side}_mount" type="fixed">
+      <origin xyz="0 ${y} 0" rpy="0 0 0"/>
+      <parent link="world"/>
+      <child link="${side}_base_link"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:arm side="left" y="${half}"/>
+  <xacro:arm side="right" y="${-half}"/>
+
+  <xacro:if value="$(arg cameras)">
+    <!-- top: 두 팔 앞쪽 위에서 아래를 본다 (lerobot_sim 의 top 카메라와 같은 자리) -->
+    <xacro:so101_camera name="top" parent="world" xyz="0.30 0 1.05" rpy="0 ${pi/2} 0"/>
+    <!-- 손목: 손목(gripper_link)에 고정. 집게 쪽을 본다 -->
+    <xacro:so101_camera name="left_wrist" parent="left_gripper_link" xyz="0 0.04 -0.02" rpy="0 ${pi/2} 0"/>
+    <xacro:so101_camera name="right_wrist" parent="right_gripper_link" xyz="0 0.04 -0.02" rpy="0 ${pi/2} 0"/>
+  </xacro:if>
+
+</robot>

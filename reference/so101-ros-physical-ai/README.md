@@ -6,13 +6,18 @@
 - 라이선스: Apache License 2.0 — 원문은 이 폴더의 [`LICENSE`](LICENSE)
 
 SO-101 리더·팔로워를 ROS2 로 돌리는 스택에서 우리에게 참고가 될 패키지만 가져왔다.
-**빌드에 들어가지 않는다** (`reference/COLCON_IGNORE`). 쓸 때는 필요한 부분을 우리 패키지로 옮겨서 고친다.
+**빌드에 들어가지 않는다** (`reference/COLCON_IGNORE`). 쓸 때는 필요한 부분을 우리 패키지로 옮겨서 고치고, 옮긴 것은 여기서 지운다.
+
+이미 옮긴 것:
+
+| 원본 | 우리 패키지 |
+|---|---|
+| `so101_description` | [`lerobot_description`](../../lerobot_description/) (양팔용 prefix, 카메라 프레임, `state_publisher`) |
 
 ## 원본에서 바꾼 것
 
-- `so101_description/onshape/` 를 뺐다. `meshes/` 와 같은 메시를 중복으로 담은 Onshape 내보내기 폴더(18 MB)라서다.
-  그에 맞춰 `so101_description/CMakeLists.txt` 의 설치 목록에서 `onshape` 를 지웠다.
-- 그 밖의 파일은 원본 그대로다.
+- 남아 있는 파일은 원본 그대로다.
+- 옮긴 패키지에서 바꾼 내용은 그 패키지 README 의 "출처" 절에 있다.
 - 가져오지 않은 것: `feetech_ros2_driver` (서브모듈, C++ 모터 드라이버), `so101_teleop`, `so101_camera_calibration`, `docs/`, `scripts/`, pixi 설정.
 
 ## 원본과 우리의 차이
@@ -31,7 +36,6 @@ Humble(이 저장소 기준 PC)에서 확인한 것만 적었다. "빌드" 는 H
 
 | 패키지 | 내용 | Humble | 우리 쪽에서 쓸 곳 |
 |---|---|---|---|
-| `so101_description` | SO-101 URDF/Xacro, 메시, RViz 설정, 표시 launch | 빌드 ✅, `xacro` 로 URDF 생성 ✅. 관절 이름이 우리 토픽 계약과 같다 (`shoulder_pan` … `gripper`). 메시는 `lerobot_sim/models/so101/assets` 와 같은 파일 | `lerobot_description` |
 | `so101_bringup` | ros2_control 컨트롤러 설정, 카메라(USB·RealSense 등) 설정과 TF 배치, 녹화 설정, launch 모음 | 빌드 ✅. launch 대부분이 `feetech_ros2_driver` 를 띄우므로 그대로는 실행 안 됨 | 카메라 설정·TF 배치 (`config/cameras`, `launch/camera_tf.launch.py`, `launch/layout_tf.launch.py`) |
 | `so101_moveit_config` | MoveIt 2 설정 (SRDF, OMPL, 관절 제한, 컨트롤러) | 빌드 ✅. 실행에 `moveit_py`, `pick_ik` 필요 — 이 PC 의 Humble 에 없음 | MoveIt 연습 |
 | `so101_kinematics` (+ `so101_kinematics_msgs`) | IK 제어, 직교 좌표 이동, 궤적 실행 노드 | 빌드 ✅. 실행에 `robokin`, `viser` (pip) 와 `so101_bringup` 필요 | IK 연습 |

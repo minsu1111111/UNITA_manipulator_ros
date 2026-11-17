@@ -170,7 +170,7 @@ class HwBridge(Node):
             self.get_logger().info(f"카메라 '{name}' {meta.get('w')}x{meta.get('h')} → {pub.topic_name}")
         img = CompressedImage()
         img.header.stamp = _stamp(meta["t"])
-        img.header.frame_id = name
+        img.header.frame_id = f"{name}_camera_optical_frame"  # lerobot_description 의 카메라 프레임
         img.format = "jpeg"
         img.data = jpeg
         self._publish(pub, img)

@@ -25,6 +25,7 @@ UNITA_manipulator_ros/
 │   ├── lerobot_bridge/       ROS 노드: robot, leader, teleop
 │   └── hosts/                모터·카메라를 실제로 다루는 쪽: hw_host (lerobot env), mock_host (lerobot 불필요)
 ├── lerobot_template/         새 패키지를 만들 때 복사하는 예제 (joint_speed 노드 + 테스트)
+├── lerobot_description/      SO-101 URDF·메시·카메라 프레임·RViz 설정. robot/joint_states → TF (state_publisher)
 ├── lerobot_sim/              MuJoCo 장면 (SO-101 단팔·양팔, 이름·단위가 토픽 계약과 같음). 노드는 아직 없음
 └── reference/                외부 참고 코드 원본 (빌드 제외). 가져다 쓸 때 우리 패키지로 옮겨서 고친다
 ```
@@ -34,7 +35,6 @@ UNITA_manipulator_ros/
 | 패키지 | 내용 |
 |---|---|
 | `lerobot_sim` | 장면은 있음. `robot/joint_states`·카메라를 내고 `robot/command` 를 받는 노드 ([lerobot_sim/README.md](lerobot_sim/README.md)) |
-| `lerobot_description` | SO-101 URDF·메시·RViz 설정, `robot_state_publisher` |
 | `lerobot_perception` | 카메라 토픽 → 물체 인식 결과 |
 | `lerobot_speech` | STT → `speech/command`, `speech/say` → TTS |
 | `lerobot_safety` | 정책과 로봇 사이 안전 게이트 (스텝 제한, 비상정지) |
@@ -101,6 +101,19 @@ ros2 topic echo /robot/joint_states
 | `fps` | `60` | 호스트 루프 주기 |
 | `spawn_host` / `zmq_host` / `bind` | `true` / `127.0.0.1` / `127.0.0.1` | 호스트를 다른 PC 에서 돌릴 때 (`ros2 run lerobot_bridge host …` + `spawn_host:=false zmq_host:=<IP>`) |
 
+## 로봇 모델 보기 (RViz)
+
+로봇(또는 mock)이 떠 있는 상태에서:
+
+```bash
+ros2 run lerobot_description state_publisher
+```
+```bash
+ros2 run rviz2 rviz2 -d $(ros2 pkg prefix lerobot_description)/share/lerobot_description/rviz/bimanual.rviz
+```
+
+단팔은 `state_publisher single` + `single.rviz`. 리더 팔 보기, 팔 간격·카메라 옵션은 [lerobot_description/README.md](lerobot_description/README.md).
+
 ## lerobot 명령과의 대응
 
 | lerobot | 여기서 | 상태 |
@@ -138,7 +151,7 @@ MoveIt 2·녹화·데이터셋 변환·정책 추론까지 있다. 구조를 그
 
 | 그쪽 패키지 | 볼 만한 것 | 우리 쪽 |
 |---|---|---|
-| `so101_description` | SO-101 URDF/Xacro·메시 | `lerobot_description` |
+| `so101_description` | SO-101 URDF/Xacro·메시 | `lerobot_description` 으로 옮김 ✅ |
 | `episode_recorder` | MCAP 녹화, 키보드로 시작·저장·버리기 | `record`, `lerobot_operator` |
 | `rosbag_to_lerobot` | rosbag(MCAP) → LeRobotDataset v3.0 변환 | `record` |
 | `so101_inference`, `policy_server` | ACT·SmolVLA 추론, 원격 GPU 추론 서버 (ZMQ / gRPC) | `policy` |
@@ -150,7 +163,7 @@ MoveIt 2·녹화·데이터셋 변환·정책 추론까지 있다. 구조를 그
 ### 그 밖에
 
 - lerobot 의 `async_inference` (`policy_server.py`, `robot_client.py`): 정책을 원격 GPU 에서 돌리고 로봇 PC 로 행동을 받는 lerobot 자체 구현. `policy` 노드의 기본 재료.
-- SO-101 공식 모델 (TheRobotStudio/SO-ARM100, Apache-2.0): MJCF·메시가 `lerobot_sim/models/so101/` 에 들어 있다. URDF 는 원본 저장소의 `Simulation/SO101` 에 있다.
+- SO-101 공식 모델 (TheRobotStudio/SO-ARM100, Apache-2.0): MJCF·메시가 `lerobot_sim/models/so101/` 에 들어 있다. URDF 는 `lerobot_description` (위 저장소에서 가져옴, MuJoCo 모델과 같은 자세임을 확인).
 
 ## 검증 기록
 
@@ -162,5 +175,6 @@ MoveIt 2·녹화·데이터셋 변환·정책 추론까지 있다. 구조를 그
 - 다른 PC 흉내: lerobot env 가 없을 때, 캘리 파일이 없을 때 → Traceback 없이 해결 방법 한 줄로 멈춤 (모터는 열지 않음)
 - `rosdep install` 이 모든 의존성을 풀어냄, XML 파일 전부 well-formed, `colcon test` 통과
 - 시뮬 장면: 단팔·양팔 모두 MuJoCo 3.8.1 에서 열리고 관절·액추에이터 이름이 토픽 계약과 같음
+- 로봇 모델: URDF 와 MuJoCo 장면이 같은 관절값에서 링크 위치 0.002 mm 이내로 같음 (단팔·양팔). mock 로봇 + `state_publisher` 로 TF 가 관절을 따라 움직임
 
 실제 모터로는 아직 안 돌려봄. 첫 실기: `-p arm:=left -p cameras:=false -p max_rel:=20` 부터 ([SETUP.md 6번](docs/SETUP.md#6-로봇-pc-만--lerobot-robotenv-캘리브레이션)).
