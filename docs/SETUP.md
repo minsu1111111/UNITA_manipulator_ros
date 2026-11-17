@@ -2,7 +2,7 @@
 
 처음 받은 PC 에서 위에서부터 따라 한다. 맡은 일에 따라 필요한 것이 다르다.
 
-| 단계 | 모두 | 로봇 PC (실제 팔 연결) | 시뮬 담당 |
+| 단계 | 모두 | 로봇 PC (실제 팔 연결) | 시뮬 작업 |
 |---|---|---|---|
 | [1. Ubuntu 22.04 + ROS2 Humble](#1-ubuntu-2204--ros2-humble) | ✅ | ✅ | ✅ |
 | [2. conda 와 ROS 안 꼬이게](#2-conda-와-ros-안-꼬이게) | ✅ (conda 가 있으면) | ✅ | ✅ |
@@ -10,7 +10,7 @@
 | [4. ROS_DOMAIN_ID](#4-ros_domain_id--다른-사람-로봇과-섞이지-않게) | ✅ | ✅ | ✅ |
 | [5. 확인 (mock)](#5-확인--로봇-없이-텔레옵) | ✅ | ✅ | ✅ |
 | [6. lerobot · robot.env · 캘리브레이션](#6-로봇-pc-만--lerobot-robotenv-캘리브레이션) | | ✅ | |
-| [7. MuJoCo](#7-시뮬-담당만--mujoco) | | | ✅ |
+| [7. MuJoCo](#7-시뮬-작업--mujoco) | | | ✅ |
 
 **로봇 없이 개발하는 사람(비전·시뮬·음성 등)은 lerobot 을 설치하지 않아도 된다.** `mock:=true` 는 ROS 만으로 돈다.
 
@@ -200,7 +200,7 @@ ros2 run lerobot_bridge robot --ros-args -p arm:=left -p cameras:=false -p max_r
 
 ---
 
-## 7. 시뮬 담당만 — MuJoCo
+## 7. 시뮬 작업 — MuJoCo
 
 시뮬 노드는 ROS 노드라 시스템 python 에 MuJoCo 가 필요하다 (conda 꺼진 터미널에서):
 
