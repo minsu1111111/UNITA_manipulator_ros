@@ -11,7 +11,6 @@ recorder / keyboard 를 따로 띄우고 싶으면 `ros2 run lerobot_recorder re
 """
 
 import ctypes
-import os
 import signal
 import subprocess
 import sys
@@ -33,9 +32,12 @@ def main():
     log_dir.mkdir(parents=True, exist_ok=True)
     log_path = log_dir / time.strftime("record_%Y%m%d_%H%M%S.log")
 
-    log = open(log_path, "w")
+    log = open(log_path, "w")  # noqa: SIM115  — recorder 가 끝날 때까지 열어 둔다 (finally 에서 닫음)
     rec = subprocess.Popen(
-        [str(lib / "recorder"), *sys.argv[1:]], stdout=log, stderr=subprocess.STDOUT, preexec_fn=_die_with_parent
+        [str(lib / "recorder"), *sys.argv[1:]],
+        stdout=log,
+        stderr=subprocess.STDOUT,
+        preexec_fn=_die_with_parent,
     )
     print(f"[record] recorder 시작 (pid {rec.pid}), 로그: {log_path}", flush=True)
 
