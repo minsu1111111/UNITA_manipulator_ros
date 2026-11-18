@@ -12,7 +12,7 @@ lerobot_description/
 │   ├── so101_cameras.xacro          카메라 프레임 매크로
 │   └── so101_macros.xacro, so101_materials.xacro
 ├── meshes/                          STL 16개
-├── rviz/                            bimanual.rviz (Fixed Frame: world), single.rviz (base_link)
+├── rviz/                            bimanual.rviz (world), single.rviz (base_link), bimanual_leader.rviz (리더 팔 보기)
 └── lerobot_description/state_publisher.py   xacro → robot_state_publisher 실행
 ```
 
@@ -34,8 +34,18 @@ ros2 run rviz2 rviz2 -d $(ros2 pkg prefix lerobot_description)/share/lerobot_des
 | 단팔 | `ros2 run lerobot_description state_publisher single` (RViz 는 `single.rviz`) |
 | 팔 간격 바꾸기 | `ros2 run lerobot_description state_publisher bimanual spacing:=0.5` |
 | 카메라 프레임 빼기 | `… cameras:=false` |
-| 리더 팔 보기 | `ros2 run lerobot_description state_publisher bimanual variant:=leader topic:=/leader/joint_states --ros-args -r __ns:=/leader -p frame_prefix:=leader/` (RViz Fixed Frame `leader/world`, RobotModel 의 Description Topic `/leader/robot_description`) |
+| 리더 팔 보기 | `ros2 run lerobot_description state_publisher bimanual variant:=leader topic:=/leader/joint_states --ros-args -r __ns:=/leader -p frame_prefix:=leader/` 후 RViz 는 `bimanual_leader.rviz` (아래) |
 | URDF 만 보기 | `xacro $(ros2 pkg prefix lerobot_description)/share/lerobot_description/urdf/so101_bimanual.urdf.xacro` |
+
+리더 팔 RViz:
+
+```bash
+ros2 run rviz2 rviz2 -d $(ros2 pkg prefix lerobot_description)/share/lerobot_description/rviz/bimanual_leader.rviz
+```
+
+리더 모델은 TF 이름 앞에 `leader/` 를 붙여 내므로(`frame_prefix`), RViz 쪽도 Fixed Frame `leader/world`,
+RobotModel 의 Description Topic `/leader/robot_description`, **TF Prefix `leader`** 세 가지를 맞춰야 한다 — `bimanual_leader.rviz` 에 들어 있다.
+TF Prefix 가 비어 있으면 RobotModel 이 접두사 없는 링크(`left_base_link`)를 찾다가 Status Error 가 나고 팔이 하얗게 멈춰 보인다.
 
 `state_publisher` 는 URDF 를 만들어 표준 `robot_state_publisher` 에 넘겨 주기만 한다.
 (URDF XML 을 `ros2 run robot_state_publisher robot_state_publisher --ros-args -p robot_description:="$(xacro …)"` 처럼
