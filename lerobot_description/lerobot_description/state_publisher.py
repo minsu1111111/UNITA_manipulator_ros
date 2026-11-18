@@ -7,7 +7,7 @@ ROS 가 YAML 로 읽다가 실패한다. 그래서 파라미터 파일에 담아
     ros2 run lerobot_description state_publisher single                # 단팔
     ros2 run lerobot_description state_publisher bimanual spacing:=0.5 cameras:=false
     ros2 run lerobot_description state_publisher bimanual variant:=leader topic:=/leader/joint_states \
-        --ros-args -r __ns:=/leader -p frame_prefix:=leader/              # 리더 팔 (RViz Fixed Frame: leader/world)
+        --ros-args -r __ns:=/leader -p frame_prefix:=leader/              # 리더 팔 (RViz 는 rviz/bimanual_leader.rviz)
 
 인자:
     모델            bimanual (기본) | single
