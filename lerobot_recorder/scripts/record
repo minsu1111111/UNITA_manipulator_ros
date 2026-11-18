@@ -1,0 +1,77 @@
+#!/usr/bin/python3
+"""`ros2 run lerobot_recorder record` — recorder 를 뒤에서 띄우고 keyboard 를 앞에 띄운다 (명령 하나).
+
+    ros2 run lerobot_recorder record --ros-args -p experiment_name:=pour_water -p task:="Pick up the cup"
+
+- 인자(--ros-args …)는 전부 recorder 로 간다. keyboard 는 인자 없이.
+- recorder 로그는 키보드 화면을 가리지 않도록 파일로 보낸다 (시작할 때 경로를 출력).
+- keyboard 에서 q 를 누르거나 Ctrl+C 를 누르면 recorder 도 끈다. 녹화 중이었으면 그 에피소드는 저장된다 (recorder 동작).
+
+recorder / keyboard 를 따로 띄우고 싶으면 `ros2 run lerobot_recorder recorder …`, `ros2 run lerobot_recorder keyboard`.
+"""
+
+import ctypes
+import os
+import signal
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+from ament_index_python.packages import get_package_prefix
+
+READY = "Activating..."  # recorder 가 activate 를 시작할 때 찍는 줄 (episode_recorder.cpp on_activate)
+
+
+def _die_with_parent():
+    ctypes.CDLL("libc.so.6", use_errno=True).prctl(1, signal.SIGINT)  # PR_SET_PDEATHSIG
+
+
+def main():
+    lib = Path(get_package_prefix("lerobot_recorder")) / "lib" / "lerobot_recorder"
+    log_dir = Path.home() / ".ros" / "log" / "lerobot_recorder"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / time.strftime("record_%Y%m%d_%H%M%S.log")
+
+    log = open(log_path, "w")
+    rec = subprocess.Popen(
+        [str(lib / "recorder"), *sys.argv[1:]], stdout=log, stderr=subprocess.STDOUT, preexec_fn=_die_with_parent
+    )
+    print(f"[record] recorder 시작 (pid {rec.pid}), 로그: {log_path}", flush=True)
+
+    # recorder 가 준비될 때까지 (최대 15 초). 일찍 죽으면 로그를 보여 주고 끝낸다
+    deadline = time.time() + 15
+    while time.time() < deadline:
+        if rec.poll() is not None:
+            print(f"[record] recorder 가 시작하지 못했다 (exit {rec.returncode}):", flush=True)
+            print(log_path.read_text()[-2000:])
+            sys.exit(1)
+        if READY in log_path.read_text():
+            break
+        time.sleep(0.2)
+    else:
+        print("[record] recorder 준비를 15 초 기다렸지만 응답 없음 — 로그를 볼 것", flush=True)
+
+    code = 0
+    try:
+        code = subprocess.call([str(lib / "keyboard")])
+    except KeyboardInterrupt:
+        pass
+    finally:
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        if rec.poll() is None:
+            rec.send_signal(signal.SIGINT)
+            try:
+                rec.wait(15)
+            except subprocess.TimeoutExpired:
+                rec.kill()
+        log.close()
+        saved = [line.split("]: ", 1)[-1] for line in log_path.read_text().splitlines() if "saved" in line]
+        print("\n[record] recorder 종료. 이번에 저장한 에피소드:", flush=True)
+        for s in saved or ["(없음)"]:
+            print("  " + s)
+    sys.exit(code)
+
+
+if __name__ == "__main__":
+    main()

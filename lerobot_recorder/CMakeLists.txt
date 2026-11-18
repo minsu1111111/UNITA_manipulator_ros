@@ -43,4 +43,7 @@ ament_target_dependencies(keyboard rclcpp std_srvs rcl_interfaces)
 
 install(TARGETS recorder keyboard DESTINATION lib/${PROJECT_NAME})
 
+# ros2 run lerobot_recorder record — recorder + keyboard 를 명령 하나로 (python)
+install(PROGRAMS scripts/record DESTINATION lib/${PROJECT_NAME})
+
 ament_package()

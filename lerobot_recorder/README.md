@@ -4,7 +4,17 @@
 
 ## 실행
 
-텔레옵(`robot` + `leader` + `teleop`, 또는 `mock:=true`)이 떠 있는 상태에서 터미널 2개:
+텔레옵(`robot` + `leader` + `teleop`, 또는 `mock:=true`)이 떠 있는 상태에서:
+
+```bash
+ros2 run lerobot_recorder record --ros-args -p experiment_name:=pour_water -p task:="Pick up the cup and pour water"
+```
+
+`record` 는 recorder 를 뒤에서 띄우고 키보드 화면을 앞에 띄운다. 인자는 전부 recorder 로 간다.
+recorder 로그는 화면을 가리지 않게 `~/.ros/log/lerobot_recorder/record_<시각>.log` 로 간다 (시작할 때 경로를 출력).
+`q` 나 Ctrl+C 로 끝내면 recorder 도 정리하고, 이번에 저장한 에피소드 목록을 보여 준다.
+
+둘을 따로 띄우려면 (recorder 로그를 직접 보고 싶을 때):
 
 ```bash
 ros2 run lerobot_recorder recorder --ros-args -p experiment_name:=pour_water -p task:="Pick up the cup and pour water"
@@ -20,7 +30,7 @@ ros2 run lerobot_recorder keyboard
 | `d` 또는 Backspace | 지금 에피소드 버리기 (번호는 다시 씀) |
 | `t` | task 문장 바꾸기 |
 | `h` | 도움말 |
-| `q` | 키보드 종료 (recorder 는 계속 돔) |
+| `q` | 끝내기 (`record` 면 recorder 도 같이 끝남. `keyboard` 를 따로 띄웠으면 recorder 는 계속 돔) |
 
 에피소드는 `~/ros_episodes/<experiment_name>/episode_000000/` 처럼 저장된다. 이미 있는 번호 다음부터 이어서 센다.
 
@@ -69,3 +79,4 @@ ros2 service call /episode_recorder/start_recording std_srvs/srv/Trigger
 - `task` 가 비어도 시작은 하고, 녹화를 시작할 때 검사 (원본은 시작 자체를 거부)
 - 기본값: 저장 위치 `/tmp/episode_recorder` → `~/ros_episodes`, 저장 형식 `mcap` → `sqlite3` (Humble 기본 플러그인)
 - 패키지 이름 `lerobot_recorder`, 실행 파일 `recorder` / `keyboard`. 키보드(`teleop_episode_keyboard.cpp`)는 원본 그대로
+- 새로 씀: `scripts/record` (recorder + keyboard 를 명령 하나로)
