@@ -42,7 +42,7 @@ DEFAULTS = {
     "TOP_CAM": "",
     "LEFT_CAM": "",
     "RIGHT_CAM": "",
-    "CAM_FOURCC": "",
+    "CAM_FOURCC": "MJPG",  # YUYV 는 여러 대가 허브를 나누면 대역폭 부족
 }
 
 # (포트 키, 시리얼 키)
