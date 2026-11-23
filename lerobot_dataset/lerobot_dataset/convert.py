@@ -104,6 +104,15 @@ class Writer:
         return self.proc.wait()
 
 
+def swap_side(name: str) -> str:
+    """left_* ↔ right_* (--swap-arms: 녹화할 때 좌우 보드 지정이 바뀌어 있었던 경우)."""
+    if name.startswith("left_"):
+        return "right_" + name[len("left_") :]
+    if name.startswith("right_"):
+        return "left_" + name[len("right_") :]
+    return name
+
+
 # ----------------------------------------------------------------------------- 에피소드 하나
 def convert_episode(bag_dir: Path, info: dict, args, writer: Writer) -> tuple[int, int]:
     custom = get_custom_data(bag_dir)
@@ -126,10 +135,11 @@ def convert_episode(bag_dir: Path, info: dict, args, writer: Writer) -> tuple[in
 
     def joints(msg) -> list[float]:
         pos = dict(zip(msg.name, msg.position))
-        lack = [n for n in names if n not in pos]
+        src = [swap_side(n) if args.swap_arms else n for n in names]  # 데이터셋 이름 n 에 넣을 bag 관절
+        lack = [n for n in src if n not in pos]
         if lack:
             raise RuntimeError(f"{bag_dir.name}: 관절 {lack} 가 메시지에 없다")
-        return [from_rad(n, pos[n]) for n in names]  # rad → lerobot 단위, 데이터셋 순서
+        return [from_rad(n, pos[m]) for n, m in zip(names, src)]  # rad → lerobot 단위, 데이터셋 순서
 
     def emit(tick_ns: int) -> bool:
         vals = {t: b.asof(tick_ns) for t, b in bufs.items()}
@@ -212,6 +222,11 @@ def main():
     ap.add_argument(
         "--push", action="store_true", help="다 쓴 뒤 Hugging Face Hub 에 올림 (hf auth login 필요)"
     )
+    ap.add_argument(
+        "--swap-arms",
+        action="store_true",
+        help="관절의 left/right 를 서로 바꿔서 넣음 (녹화 때 robot.env 의 좌우 보드 지정이 바뀌어 있었을 때. 카메라는 그대로)",
+    )
     ap.add_argument("--lerobot-py", default="", help="lerobot env 의 python (기본: 자동으로 찾음)")
     args = ap.parse_args(sys.argv[1:])
     logging.basicConfig(level=logging.INFO, format="[convert] %(message)s")
@@ -222,6 +237,8 @@ def main():
     info = probe(eps[0])
     log.info("에피소드 %d개, 관절 %d개, 카메라 %s, %d fps → %s",
              len(eps), len(info["names"]), info["cameras"] or "없음", args.fps, args.repo_id)  # fmt: skip
+    if args.swap_arms:
+        log.info("--swap-arms: 관절 left/right 를 바꿔서 넣는다 (카메라는 그대로)")
 
     writer = Writer(args.lerobot_py)
     writer.send({

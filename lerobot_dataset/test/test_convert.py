@@ -19,7 +19,7 @@ NS = 1_000_000_000
 NAMES = joint_names("bi")
 
 
-def make_bag(path, seconds=1.0, joint_hz=60, cam_hz=30, start_cmd_s=0.0):
+def make_bag(path, seconds=1.0, joint_hz=60, cam_hz=30, start_cmd_s=0.0, right_scale=1.0):
     """joint_states·command 값 = 시각(초)을 lerobot 도로 쓴 값 → 프레임 값으로 '언제의 값인지' 알 수 있다."""
     w = rosbag2_py.SequentialWriter()
     w.open(
@@ -37,7 +37,8 @@ def make_bag(path, seconds=1.0, joint_hz=60, cam_hz=30, start_cmd_s=0.0):
     events = []
     for i in range(int(seconds * joint_hz)):
         t = i / joint_hz
-        js = JointState(name=NAMES, position=[to_rad(n, 50.0 if "gripper" in n else t) for n in NAMES])
+        k = {n: right_scale if n.startswith("right") else 1.0 for n in NAMES}  # 오른팔 몸통 = t × right_scale
+        js = JointState(name=NAMES, position=[to_rad(n, 50.0 if "gripper" in n else t * k[n]) for n in NAMES])
         events.append((t0 + int(t * NS), "/robot/joint_states", js))
         if t >= start_cmd_s:
             cmd = JointState(name=NAMES, position=[to_rad(n, 50.0 if "gripper" in n else -t) for n in NAMES])
@@ -63,7 +64,7 @@ class FakeWriter:
         return [m for m in self.msgs if m["kind"] == "frame"]
 
 
-ARGS = SimpleNamespace(task="pour", fps=30, max_age=0.1)
+ARGS = SimpleNamespace(task="pour", fps=30, max_age=0.1, swap_arms=False)
 
 
 def test_probe(tmp_path):
@@ -121,9 +122,26 @@ def test_task_required(tmp_path):
         convert_episode(
             tmp_path / "ep",
             probe(tmp_path / "ep"),
-            SimpleNamespace(task="", fps=30, max_age=0.1),
+            SimpleNamespace(task="", fps=30, max_age=0.1, swap_arms=False),
             FakeWriter(),
         )
+
+
+def test_swap_arms(tmp_path):
+    """--swap-arms: 데이터셋의 left_* 에 bag 의 right_* 값이 들어간다 (상태와 명령 둘 다)."""
+    make_bag(tmp_path / "ep", seconds=0.5, right_scale=3.0)
+    for swap in (False, True):
+        w = FakeWriter()
+        args = SimpleNamespace(task="pour", fps=30, max_age=0.1, swap_arms=swap)
+        convert_episode(tmp_path / "ep", probe(tmp_path / "ep"), args, w)
+        f = w.frames()[-1]
+        st, ac = dict(zip(NAMES, f["state"])), dict(zip(NAMES, f["action"]))
+        ratio = st["left_shoulder_pan"] / st["right_shoulder_pan"]
+        assert ratio == pytest.approx(3.0 if swap else 1 / 3, rel=1e-6)
+        assert ac["left_shoulder_pan"] == pytest.approx(
+            -st["left_shoulder_pan"] / (3.0 if swap else 1.0), abs=0.05
+        )
+        assert st["left_gripper"] == pytest.approx(50.0, abs=1e-6)
 
 
 def test_math_sanity():

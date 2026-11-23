@@ -23,6 +23,7 @@ lerobot-dataset-viz --repo-id local/pour_water --episode-index 0
 | `--task` | 녹화 때 넣은 것 | 과제 문장을 덮어쓴다 |
 | `--max-age` | `0.1` | 프레임 시각보다 이만큼(초) 이상 오래된 값이 있으면 그 프레임을 버린다 |
 | `--overwrite` | | 같은 이름이 있으면 지우고 새로 만든다 |
+| `--swap-arms` | | 관절의 left/right 를 서로 바꿔 넣는다. 녹화할 때 robot.env 의 좌우 보드 지정이 바뀌어 있었을 때 (카메라는 그대로) |
 | `--no-videos` | | 이미지를 mp4 대신 png 로 |
 | `--push` | | 다 쓴 뒤 Hugging Face Hub 에 올린다 (`hf auth login` 필요) |
 | `--lerobot-py` | 자동 | lerobot env 의 python |
