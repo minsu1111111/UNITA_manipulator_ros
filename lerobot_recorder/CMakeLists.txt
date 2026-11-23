@@ -1,5 +1,6 @@
 # 원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 episode_recorder/CMakeLists.txt
-# 변경: 패키지 이름 lerobot_recorder, 실행 파일 이름 recorder / keyboard, launch·config 설치·lint 테스트 제거
+# 변경: 패키지 이름 lerobot_recorder, 실행 파일 이름 recorder / manual_keyboard (원본 키보드), launch·config 설치·lint 테스트 제거.
+#       keyboard (lerobot-record 와 같은 조작) 와 record 는 새로 쓴 python 스크립트
 cmake_minimum_required(VERSION 3.8)
 project(lerobot_recorder)
 
@@ -35,13 +36,16 @@ if(rosbag2_storage_VERSION VERSION_GREATER_EQUAL "0.22.0")
   target_compile_definitions(recorder PRIVATE HAS_ROSBAG2_CUSTOM_DATA=1)
 endif()
 
-# ros2 run lerobot_recorder keyboard
-add_executable(keyboard
+# ros2 run lerobot_recorder manual_keyboard — 원본 키보드 (손으로 시작·저장)
+add_executable(manual_keyboard
   src/teleop_episode_keyboard.cpp
 )
-ament_target_dependencies(keyboard rclcpp std_srvs rcl_interfaces)
+ament_target_dependencies(manual_keyboard rclcpp std_srvs rcl_interfaces)
 
-install(TARGETS recorder keyboard DESTINATION lib/${PROJECT_NAME})
+install(TARGETS recorder manual_keyboard DESTINATION lib/${PROJECT_NAME})
+
+# ros2 run lerobot_recorder keyboard — lerobot-record 와 같은 녹화 조작 (python)
+install(PROGRAMS scripts/keyboard DESTINATION lib/${PROJECT_NAME})
 
 # ros2 run lerobot_recorder record — recorder + keyboard 를 명령 하나로 (python)
 install(PROGRAMS scripts/record DESTINATION lib/${PROJECT_NAME})

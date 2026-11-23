@@ -1,6 +1,7 @@
 // 원본: legalaspro/so101-ros-physical-ai (Apache-2.0, 커밋 58318c9) 의 episode_recorder/include/episode_recorder/episode_recorder.hpp
 // 변경:
 //   - auto_cameras_ 멤버 추가
+//   - ~/delete_last_episode 서비스와 last_saved_dir_ (lerobot-record 처럼 리셋 중에도 '다시 녹화' 하려고)
 
 
 #ifndef EPISODE_RECORDER__EPISODE_RECORDER_HPP_
@@ -101,6 +102,14 @@ private:
                    std::shared_ptr<std_srvs::srv::Trigger::Response> res);
   void handle_discard(const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
                       std::shared_ptr<std_srvs::srv::Trigger::Response> res);
+
+  // [UNITA] 마지막으로 저장한 에피소드를 지우고 번호를 되돌린다 (녹화 중이 아닐 때만).
+  //         lerobot-record 는 리셋이 끝난 뒤에 저장 여부를 정하므로 리셋 중 ← 로 직전 에피소드를 다시 녹화할 수 있다.
+  //         우리는 녹화를 멈추는 순간 bag 을 닫으므로, 같은 동작을 이 서비스로 만든다.
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr delete_last_service_;
+  std::filesystem::path last_saved_dir_;
+  void handle_delete_last(const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
+                          std::shared_ptr<std_srvs::srv::Trigger::Response> res);
 
   // Lifecycle guard
   bool cleaned_up_{false};

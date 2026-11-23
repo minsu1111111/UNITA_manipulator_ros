@@ -4,7 +4,7 @@
     ros2 launch lerobot_bringup teleop.launch.py arm:=left max_rel:=20 cameras:=false   # 왼팔만, 처음 붙일 때
     ros2 launch lerobot_bringup teleop.launch.py mock:=true rviz:=true    # 로봇 없이, RViz 까지
     ros2 launch lerobot_bringup teleop.launch.py record:=true experiment_name:=pour_water task:="Pick up the cup"
-        → 다른 터미널에서  ros2 run lerobot_recorder keyboard   (r 시작, s 저장, d 버리기)
+        → 다른 터미널에서  ros2 run lerobot_recorder keyboard   (lerobot-record 와 같은 조작: → 다음, ← 다시, Esc 끝)
 
 인자:
     arm             bi | left | right                (기본 bi)

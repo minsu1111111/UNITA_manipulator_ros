@@ -135,10 +135,11 @@ ros2 run rviz2 rviz2 -d $(ros2 pkg prefix lerobot_description)/share/lerobot_des
 텔레옵이 떠 있는 상태에서:
 
 ```bash
-ros2 run lerobot_recorder record --ros-args -p experiment_name:=pour_water -p task:="Pick up the cup and pour water"
+ros2 run lerobot_recorder record --ros-args -p experiment_name:=pour_water -p task:="Pick up the cup and pour water" \
+  -p num_episodes:=10 -p episode_time_s:=30 -p reset_time_s:=10
 ```
 
-`r` 녹화 시작, `s` 저장, `d` 버리기, `q` 끝내기. 에피소드는 `~/ros_episodes/pour_water/episode_*` 에 쌓인다. 다 모으면 (lerobot env 가 있는 PC 에서):
+조작은 `lerobot-record` 와 같다: 에피소드 녹화 → 리셋 → 다음 에피소드 (`num_episodes`·`episode_time_s`·`reset_time_s` 파라미터), `→` 다음 · `←` 다시 녹화 · `Esc` 저장하고 끝. 에피소드는 `~/ros_episodes/pour_water/episode_*` 에 쌓인다. 다 모으면 (lerobot env 가 있는 PC 에서):
 
 ```bash
 ros2 run lerobot_dataset convert ~/ros_episodes/pour_water --repo-id local/pour_water

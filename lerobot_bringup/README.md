@@ -33,10 +33,10 @@ ros2 launch lerobot_bringup teleop.launch.py teleop_enabled:=false rviz:=true
 ros2 launch lerobot_bringup teleop.launch.py record:=true experiment_name:=pour_water task:="Pick up the cup and pour water"
 ```
 
-`record:=true` 일 때 키보드 (다른 터미널, `r` 시작 · `s` 저장 · `d` 버리기 · `q` 키보드 끝):
+`record:=true` 일 때 키보드 (다른 터미널. `lerobot-record` 와 같은 조작 — `→` 다음 · `←` 다시 녹화 · `Esc` 저장하고 끝):
 
 ```bash
-ros2 run lerobot_recorder keyboard
+ros2 run lerobot_recorder keyboard --ros-args -p num_episodes:=10 -p episode_time_s:=30 -p reset_time_s:=10
 ```
 
 **끄기: Ctrl+C 한 번** — 모든 노드가 같이 꺼진다. robot 이 꺼지면 토크가 꺼지니 팔을 받칠 것.
