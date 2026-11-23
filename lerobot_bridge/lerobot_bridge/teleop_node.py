@@ -13,6 +13,7 @@ lerobot-teleoperate 의 루프(teleop.get_action → robot.send_action)를 ROS �
 """
 
 import contextlib
+import signal
 
 import rclpy
 from rcl_interfaces.msg import SetParametersResult
@@ -64,6 +65,8 @@ def main(args=None):
     except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
+        # launch 에서 Ctrl+C 하면 SIGINT 가 두 번 온다 (터미널 + launch). 정리하는 동안 두 번째는 무시
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
         with contextlib.suppress(Exception):
             node.destroy_node()
         with contextlib.suppress(Exception):

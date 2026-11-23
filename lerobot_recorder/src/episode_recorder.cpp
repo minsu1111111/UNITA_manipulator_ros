@@ -4,6 +4,7 @@
 //   - storage_id 기본값: mcap → sqlite3 (Humble 기본 플러그인)
 //   - task 가 비어도 configure 는 통과 (녹화 시작 때 검사는 원본 그대로)
 //   - topics 를 비우면 /robot/joint_states, /robot/command + /robot/cam/*/image/compressed 자동 탐색
+//     (자동 탐색일 때는 탐색 타이머를 멈추지 않아 늦게 생긴 카메라도 구독한다)
 
 
 
@@ -156,7 +157,9 @@ EpisodeRecorder::on_activate(const rclcpp_lifecycle::State & /*state*/) {
       resolve_topic_types();
       create_subscriptions();
 
-      if (subs_by_topic_.size() == topics_.size()) {
+      // [UNITA] 카메라 자동 탐색이면 타이머를 멈추지 않는다 — 카메라 토픽은 robot 노드가 첫 프레임을 받을 때
+      //         생기므로, launch 로 같이 띄우면 recorder 가 먼저 떠서 관절 토픽만 보고 탐색을 끝내 버린다
+      if (subs_by_topic_.size() == topics_.size() && !auto_cameras_) {
         RCLCPP_INFO(get_logger(), "Discovery complete: subscribed to all %zu topics.",
                     topics_.size());
         discovery_timer_.reset();

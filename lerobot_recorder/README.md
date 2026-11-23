@@ -13,6 +13,10 @@ ros2 run lerobot_recorder record --ros-args -p experiment_name:=pour_water -p ta
 `record` 는 recorder 를 뒤에서 띄우고 키보드 화면을 앞에 띄운다. 인자는 전부 recorder 로 간다.
 recorder 로그는 화면을 가리지 않게 `~/.ros/log/lerobot_recorder/record_<시각>.log` 로 간다 (시작할 때 경로를 출력).
 `q` 나 Ctrl+C 로 끝내면 recorder 도 정리하고, 이번에 저장한 에피소드 목록을 보여 준다.
+녹화 중에 끝내도 그 에피소드는 끝까지 저장된다 (task 포함).
+
+launch 로 텔레옵과 같이 띄우려면 `ros2 launch lerobot_bringup teleop.launch.py record:=true experiment_name:=… task:="…"`
+후 다른 터미널에서 `ros2 run lerobot_recorder keyboard`.
 
 둘을 따로 띄우려면 (recorder 로그를 직접 보고 싶을 때):
 
@@ -74,7 +78,10 @@ ros2 service call /episode_recorder/start_recording std_srvs/srv/Trigger
 [legalaspro/so101-ros-physical-ai](https://github.com/legalaspro/so101-ros-physical-ai) 의 `episode_recorder`
 (Apache-2.0, 커밋 58318c9, 저작자 Dmitri Manajev). 라이선스 원문은 [`LICENSE`](LICENSE). 바꾼 곳은 각 파일 머리에 적었다. 요약:
 
-- 시작하자마자 configure → activate (원본은 launch 가 해 줌. 우리는 `ros2 run` 만 쓴다)
+- 시작하자마자 configure → activate (원본은 launch 가 해 줌. 우리는 `ros2 run` 으로도 바로 쓴다)
+- Ctrl+C 를 직접 처리: 녹화 중이던 에피소드를 deactivate 로 저장(task 기록)한 뒤 끝내고, 그동안 두 번째 신호는 무시
+  (launch 에서는 SIGINT 가 두 번 와서, 원래대로면 저장 도중에 죽거나 task 가 빠졌다)
+- 카메라 자동 탐색일 때 탐색 타이머를 멈추지 않음 (launch 로 같이 띄우면 카메라 토픽이 recorder 보다 늦게 생긴다)
 - `topics` 를 비우면 토픽 계약의 기본값 + 카메라 자동 탐색
 - `task` 가 비어도 시작은 하고, 녹화를 시작할 때 검사 (원본은 시작 자체를 거부)
 - 기본값: 저장 위치 `/tmp/episode_recorder` → `~/ros_episodes`, 저장 형식 `mcap` → `sqlite3` (Humble 기본 플러그인)

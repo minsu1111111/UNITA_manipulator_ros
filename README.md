@@ -24,6 +24,7 @@ UNITA_manipulator_ros/
 ├── lerobot_bridge/           lerobot 기능을 ROS 노드로. lerobot 과 만나는 유일한 패키지
 │   ├── lerobot_bridge/       ROS 노드: robot, leader, teleop
 │   └── hosts/                모터·카메라를 실제로 다루는 쪽: hw_host (lerobot env), mock_host (lerobot 불필요)
+├── lerobot_bringup/          launch 파일: 텔레옵 한 번에 (RViz·녹화 옵션), 로봇 모델 보기
 ├── lerobot_template/         새 패키지를 만들 때 복사하는 예제 (joint_speed 노드 + 테스트)
 ├── lerobot_description/      SO-101 URDF·메시·카메라 프레임·RViz 설정. robot/joint_states → TF (state_publisher)
 ├── lerobot_recorder/         에피소드 녹화 (rosbag2) + 키보드 시작·저장·버리기
@@ -56,6 +57,18 @@ ROS2 Humble 의 `rclpy` 는 시스템 Python **3.10** 전용이고 lerobot 0.6.1
 한 프로세스에 둘을 넣을 수 없다. 그래서 `robot`/`leader` 노드가 호스트를 자식 프로세스로 띄우고 ZMQ 로 주고받는다.
 실제 팔이면 lerobot env 의 python 으로 `hw_host`, `mock:=true` 면 시스템 python 으로 `mock_host` 를 띄운다.
 사용자는 신경 쓸 필요 없다 — `ros2 run` 한 번이면 둘 다 뜨고 같이 꺼진다.
+
+## launch 로 한 번에
+
+```bash
+ros2 launch lerobot_bringup teleop.launch.py
+```
+
+robot + leader + teleop 이 한 번에 뜬다. 자주 쓰는 옵션: `arm:=left`, `mock:=true`, `max_rel:=20`, `rviz:=true`,
+`record:=true experiment_name:=… task:="…"` (키보드는 다른 터미널에서 `ros2 run lerobot_recorder keyboard`). Ctrl+C 한 번으로 전부 꺼진다.
+로봇 모델만 보려면 `ros2 launch lerobot_bringup view.launch.py` (리더는 `who:=leader`). 자세한 건 [lerobot_bringup/README.md](lerobot_bringup/README.md).
+
+아래는 같은 일을 노드 하나씩 `ros2 run` 으로 하는 방법이다 — 노드가 무엇을 하는지 배울 때, 문제를 좁힐 때 쓴다.
 
 ## 텔레옵 (= `lerobot-teleoperate`)
 
